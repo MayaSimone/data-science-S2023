@@ -2,21 +2,8 @@
 
 # data-science-curriculum
 
-This is a curriculum of **open-source** data science exercises, intended to take a student from zero coding experience to basic data science literacy. These exercises are heavily inspired by the (discontinued) [Data Challenge Lab](https://dcl-docs.stanford.edu/home/) at Stanford University and rely on the [Tidyverse](https://www.tidyverse.org/).
+This Maya Sivanandan's copy of a curriculum of **open-source** data science exercises, intended to take a student from zero coding experience to basic data science literacy. These exercises are heavily inspired by the (discontinued) [Data Challenge Lab](https://dcl-docs.stanford.edu/home/) at Stanford University and rely on the [Tidyverse](https://www.tidyverse.org/).
 
-## How to Use This Repo
-
-1. (Setup) Complete [this exercise](https://zdelrosario.github.io/data-science-curriculum/setup-rstudio.html) to install RStudio.
-2. (Setup) Download and unzip [this archive](https://github.com/zdelrosario/data-science-curriculum/archive/refs/heads/build.zip) to obtain the curriculum materials.
-3. (Setup) Open the folder you unzipped as a project in RStudio (`File > Open Project...`).
-4. (Learn) Work through the exercise files in the `exercises_sequenced/` folder at your own pace to learn data science skills.
-5. (Learn) Use the challenges in the `challenges/` folder to put your new skills to use.
-
-**Suggested order**: The exercises filenames start with a numerical `dXY` prefix to denote
-their suggested day-order. This is provided to
-[interleave](https://academicaffairs.arizona.edu/l2l-strategy-interleaving)
-topics and provide about an hour of work per day. I recommend working 5 days a
-week on the exercises and taking weekends off!
 
 ## Table of Contents
 
