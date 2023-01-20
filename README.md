@@ -2,7 +2,7 @@
 
 # data-science-curriculum
 
-This Maya Sivanandan's copy of a curriculum of **open-source** data science exercises, intended to take a student from zero coding experience to basic data science literacy. These exercises are heavily inspired by the (discontinued) [Data Challenge Lab](https://dcl-docs.stanford.edu/home/) at Stanford University and rely on the [Tidyverse](https://www.tidyverse.org/).
+This my repository for the Data Science course run at Olin College taught by Professor Zach del Rosario during the spring semester 2023. The curriculum made from **open-source** data science exercises, intended to take a student from zero coding experience to basic data science literacy. These exercises are heavily inspired by the (discontinued) [Data Challenge Lab](https://dcl-docs.stanford.edu/home/) at Stanford University and rely on the [Tidyverse](https://www.tidyverse.org/).
 
 
 ## Table of Contents
