@@ -30,15 +30,30 @@ knitr::opts_chunk$set(echo = TRUE)
 *Hint*: We learned how to inspect a dataset in `e-data-00-basics`!
 
 ```{r q1-task, eval=FALSE}
+head(diamonds)
 ```
+cut: quality of the cut (Fair, Good, Very Good, Premium, Ideal)
+
+color: diamond color, from D (best) to J (worst)
+
+clarity: a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))
+
 
 ### __q2__ Use your "standard checks" to determine what variables the dataset has.
-
+```{r}
+?diamonds
+glimpse(diamonds)
+```
+carat, cut, color, clarity, depth, table, price, x, y, z
 
 Now that we have the list of variables in the dataset, we know what we can visualize!
 
-### __q3__ Using `ggplot`, visualize `price` vs `carat` with points. What trend do
-you observe?
+### __q3__ Using `ggplot`, visualize `price` vs `carat` with points. What trend do you observe?
+
+```{r}
+?ggplot
+```
+
 
 *Hint*: Usually the language `y` vs `x` refers to the `vertical axis` vs
 `horizontal axis`. This is the opposite order from the way we often specify `x,
@@ -46,12 +61,14 @@ y` pairs. Language is hard!
 
 ```{r q3-task}
 ## TODO: Complete this code
-ggplot(diamonds)
+diamonds %>%
+  ggplot(aes(carat, price))+
+  geom_point()
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- Generally, as the carat of a diamond increases, so to does its price
 
 ## A note on *aesthetics*
 
@@ -62,19 +79,20 @@ instance, in the plot above you assigned `carat` to the `x` aesthetic, and
 some of which vary based on the `geom_` you are using to visualize. The next
 question will explore this idea more.
 
-### __q4__ Create a new graph to visualize `price`, `carat`, and `cut`
-simultaneously.
+### __q4__ Create a new graph to visualize `price`, `carat`, and `cut` simultaneously.
 
 *Hint*: Remember that you can add additional aesthetic mappings in `aes()`. Some options include `size`, `color`, and `shape`.
 
 ```{r q4-task}
 ## TODO: Complete this code
-ggplot(diamonds)
+diamonds %>%
+  ggplot(aes(carat, price, color = cut))+
+  geom_point()
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- There seems to be minimal differences in cost between the 'ideal', 'premium', and 'very good' cut diamonds, but the 'fair' diamonds tend to have a lower price compared to diamonds of the same carat.
 
 <!-- include-exit-ticket -->
 # Exit Ticket
