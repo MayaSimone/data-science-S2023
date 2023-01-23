@@ -94,8 +94,13 @@ Here the bolded response is *actively* engaging with your colleague's question, 
 **Observations**:
 
 - Is the bolded response **active** or **passive**? Why?
+  Active because the presenter is replying in a way that directly engages with    the question from their colleague
+  
 - Is the bolded response **constructive** or **destructive**? Why?
+  Constructive because it doesn't just dismiss and shutdown the comment from the   colleague; it shows appreciation for the comment.
+  
 - How does this statement make you *feel*, relative to the bolded statement before the q1 prompt?
+  It feels a lot more positive, like the comment was valued and useful and not    just something bad
 
 ### __q2__ Identify the nature of the bolded line below, rating it as either **active vs passive** and **constructive vs destructive**.
 
@@ -108,8 +113,11 @@ Here the bolded response is *actively* engaging with your colleague's question, 
 **Observations**:
 
 - Is the bolded response **active** or **passive**? Why?
+  Passive because it doesn't actually engage/build upon the colleague's comment
 - Is the bolded response **constructive** or **destructive**? Why?
+  It's constructive because it shows appreciation for the comment made
 - How does this statement make you *feel*, relative to the bolded statement before the q1 prompt?
+  It doesn't make me feel bad or negative, but it feels like the problem wasn't resolved and I was ignored.
 
 **Intermediate Conclusion**: We can quite naturally think of discussion responses in the APCD framework. Therefore, we should try to give active and constructive responses in data discussions!
 
@@ -174,8 +182,10 @@ Let's practice once more!
 
 **Observations**:
 
-- Is the bolded response **active** or **passive**? Why?
+- Is the bolded response **active** or **passive**? Why?\
+  Passive, it is only very tangentially related to what the presenter is saying,   it isn't engaging with the graph at all
 - Is the bolded response **constructive** or **destructive**? Why?
+  Neither, doesn't necessarily have an emotional tone to it. It's just unrelated
 
 <!-- include-exit-ticket -->
 # Exit Ticket
