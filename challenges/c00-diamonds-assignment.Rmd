@@ -1,7 +1,7 @@
 ---
 title: "Getting Started: Diamonds"
-author: "(Your name here)"
-date: 2020-
+author: "Maya Sivanandan"
+date: 2023
 output:
   github_document:
     toc: true
@@ -53,24 +53,38 @@ In this first stage, you will explore the `diamonds` dataset and document your o
 *Hint*: We learned how to do this in `e-vis00-basics`!
 
 ```{r q1-task}
-## TASK: Plot `price` vs `carat` below
-## Your code here!
+diamonds %>%
+  ggplot(aes(carat, price))+
+  geom_point()
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- Generally, as the carat of a diamond increases, so to does its price. They show a positive correlation.
+
+- Most of the diamonds have a carat value between 0 and 2.
 
 ### __q2__ Create a visualization showing variables `carat`, `price`, and `cut` simultaneously. Experiment with which variable you assign to which aesthetic (`x`, `y`, etc.) to find an effective visual.
 
 ```{r q2-task}
 ## TASK: Plot `price`, `carat`, and `cut` below
-## Your code here!
+diamonds %>%
+  ggplot(aes(carat, price, color = cut))+
+  geom_point()
+
+diamonds %>%
+  ggplot(aes(cut, carat, color = price))+
+  geom_point()
+
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- Carat seems to be more positively correlated with price than cut is.
+
+- There seems to be minimal differences in price between the 'ideal', 'premium', and 'very good' cut diamonds, best shown by the second graph
+
+- The 'fair' diamonds tend to have a lower price compared to diamonds of the same carat.
 
 
 # Communication
