@@ -10,10 +10,7 @@ reading: 45
 # Stats: EDA Basics
 
 *Purpose*: *Exploratory Data Analysis* (EDA) is a __crucial__ skill for a
-practicing data scientist. Unfortunately, much like human-centered design EDA is
-hard to teach. This is because EDA is **not** a strict procedure, so much as it
-is a **mindset**. Also, much like human-centered design, EDA is an *iterative,
-nonlinear process*. There are two key principles to keep in mind when doing EDA:
+practicing data scientist. Unfortunately, much like human-centered design, EDA is hard to teach. This is because EDA is **not** a strict procedure, so much as it is a **mindset**. Also, much like human-centered design, EDA is an *iterative, nonlinear process*. There are two key principles to keep in mind when doing EDA:
 
 - 1. Curiosity: Generate lots of ideas and hypotheses about your data.
 - 2. Skepticism: Remain unconvinced of those ideas, unless you can find credible
@@ -40,10 +37,11 @@ library(tidyverse)
 
 ```
 
-### __q0__ Remember from `e02-data-basics` there were *simple checks* we're supposed
-to do? Do those simple checks on the diamonds dataset below.
+### __q0__ Remember from `e02-data-basics` there were *simple checks* we're supposed to do? Do those simple checks on the diamonds dataset below.
 
 ```{r q0-task}
+#?diamonds
+glimpse(diamonds)
 ```
 
 I'm going to walk you through a train of thought I had when studying the
@@ -60,8 +58,7 @@ dataset.
 Since an `Ideal` cut seems more labor-intensive, I hypothesize that `Ideal` cut
 diamonds are less numerous than other cuts.
 
-### __q1__ Run the chunk below, and study the plot. Was hypothesis 1 correct? Why
-or why not?
+### __q1__ Run the chunk below, and study the plot. Was hypothesis 1 correct? Why or why not?
 
 ```{r q1-task}
 diamonds %>%
@@ -70,7 +67,7 @@ diamonds %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- The hypothesis was incorrect as the ideal cut diamonds are actually the most common
 
 ## Hypothesis 2
 
@@ -87,7 +84,7 @@ diamonds %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- It's hard to make any definite conclusions about cost here since there is significant overplotting
 
 The following is a set of *boxplots*; the middle bar denotes the median, the
 boxes denote the *quartiles* (upper and lower "quarters" of the data), and the
@@ -102,7 +99,7 @@ diamonds %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- Ideal diamonds seem to be less expensive than the other cuts
 
 ## Unraveling Hypothesis 2
 
@@ -122,7 +119,7 @@ diamonds %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- The median carat of the 'Ideal' cut diamonds is lower than the other cuts, while the 'Fair' cut diamonds have the highest median carat. This makes sense as carat is based on the weight on the diamond, and cutting a diamond more would reduce it's weight
 
 ## Footnotes
 
