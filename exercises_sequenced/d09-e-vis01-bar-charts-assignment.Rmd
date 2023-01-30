@@ -35,6 +35,11 @@ the same visual using `geom_col()`.
 mpg %>%
   ggplot(aes(trans)) +
   geom_bar()
+
+mpg %>%
+  count(trans) %>% 
+  ggplot() +
+  geom_col(mapping = aes(x = trans, y = n))
 ```
 
 The reading mentioned that when using `geom_col()` our x-y data should be
@@ -56,12 +61,16 @@ mpg %>% filter(cty == 20)
 
 ```{r q2-task}
 mpg %>%
-  ggplot(aes(x = cty, y = hwy)) +
+  ggplot(aes(x = cty, y = hwy, )) +
   geom_col()
+
+mpg %>%
+  ggplot(aes(x = cty, y = hwy, )) +
+  geom_col(position = "dodge")
 ```
 
 **Observations**:
-- Write your observations here!
+- The default parameter for position is stacked, so isn't showing the actually 'hwy' values
 
 A more standard way to visualize this kind of data is a *scatterplot*, which
 we'll study later. For now, here's an example of a more effective way to
@@ -72,6 +81,7 @@ visualize `cty` vs `hwy`:
 mpg %>%
   ggplot(aes(cty, hwy)) +
   geom_point()
+  ##geom_count() will make dots sizes relative to count
 ```
 
 ### __q3__ The following are two different visualizations of the `mpg` dataset.
@@ -87,7 +97,8 @@ mpg %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- 'suv' is the most common class of car, while '2seater' is the least common
+- The don't add to the graph, they just reiterate the already seperate/labelled bars
 
 ```{r q4-v2}
 ## TODO: Run this code without changing, describe your observations on the data
@@ -97,12 +108,15 @@ mpg %>%
 ```
 
 **Observations**:
-- Write your observations here!
+- Rear wheel drive cars are the least common.
+- Outside of the SUVs, front wheel drives are more common
 
 **Compare `v1` and `v2`**:
 
 - Which visualization---`v1` or `v2`---enabled you to make more observations?
 - What was the difference between `v1` and `v2`?
+
+- `v2` allowed for more observations because it communicates all the same data from `v1` but it instead uses color to show the number of `drv` for each car class. We can draw conclusions about types of drive trains for each class and the overall data set.
 
 ### __q4__ The following code has a bug; it does not do what its author intended.
 Identify and fix the bug. What does the resulting graph tell you about the
@@ -113,23 +127,23 @@ do this in a future exercise.
 
 ```{r q4-task}
 mpg %>%
-  ggplot(aes(x = manufacturer, fill = class), position = "dodge") +
-  geom_bar() +
+  ggplot() +
+  geom_bar(aes(x = manufacturer, fill = class), position = "dodge") +
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust = 0))
 ```
 
 **Observations**
-- Your observations here!
+- Dodge makes the majority of pickups
+- Audi, Volkswagen, and Toyota make most compact cars
+- Mercury, Lincoln, Land Rover, Jeep only make SUVs
 
-### __q5__ The following graph is hard to read. What other form of faceting would
-make the visual more convenient to read? Modify the code below with your
-suggested improvement.
+### __q5__ The following graph is hard to read. What other form of faceting would make the visual more convenient to read? Modify the code below with your suggested improvement.
 
 ```{r q5-task}
 mpg %>%
   ggplot(aes(x = cyl)) +
   geom_bar() +
-  facet_grid(~ manufacturer)
+  facet_wrap(~ manufacturer) ##change facet_grid()
 ```
 
 <!-- include-exit-ticket -->
