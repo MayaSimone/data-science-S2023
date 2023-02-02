@@ -33,6 +33,7 @@ library(tidyverse)
 ```
 
 ### __q1__ What is the difference between these two versions? How are they the same? How are they different?
+They both result in the same data, but one uses the pipe operator to put the original data set variable first.
 
 ```{r q1-task}
 ## Version 1
@@ -58,6 +59,10 @@ in the table below:
 ### __q2__ Using `summarize()` and a logical summary function, determine the number of rows with `Ideal` `cut`. Save this value to a column called `n_ideal`.
 
 ```{r q2-task}
+df_q2 <-
+  diamonds %>% 
+  summarise(n_ideal = sum(cut == "Ideal"))
+
 df_q2
 ```
 
@@ -78,9 +83,14 @@ print("Great job!")
 
 ```{r q3-task}
 diamonds %>%
-  ## group_by(color, clarity) %>%
+  # group_by(color, clarity) %>%
+  summarize(price = mean(price))
+
+diamonds %>%
+  group_by(color, clarity) %>%
   summarize(price = mean(price))
 ```
+Commented provides a mean price for all diamonds in the data set while uncommented provides a mean price for each color/clarity group
 
 
 ### Vectorized Functions
@@ -111,9 +121,29 @@ tibble to `df_q4`, and assign the appropriate values to `cov_depth` and
 ```{r q4-task}
 ## TODO: Compute the `cov_depth` and `cov_diff` and assign the result to df_q4
 df_q4 <-
-  diamonds
+  diamonds %>% 
+  mutate(
+    depth_computed = 100 * 2 * z /
+    (x + y), 
+    diff = depth - depth_computed,
+  ) %>% 
+  summarise(
+    # depth_mean = mean(depth, na.rm = TRUE),
+    # depth_sd = sd(depth, na.rm = TRUE),
+    # cov_depth = depth_sd / depth_mean,
+    # 
+    # diff_mean = mean(diff, na.rm = TRUE),
+    # diff_sd = sd(diff, na.rm = TRUE),
+    # cov_diff = diff_sd / diff_mean,
+    
+    cov_depth = sd(depth, na.rm = TRUE) / mean(depth, na.rm = TRUE),
+    cov_diff = sd(diff, na.rm = TRUE) / mean(diff, na.rm = TRUE)
+  )
+    
 df_q4
 ```
+- cov_depth is small because the differences in depth are small relative to the scale
+- cov_diff is massive because the mean difference between depth and calculated_depth is so small
 
 **Observations**
 
@@ -142,6 +172,14 @@ about the various cuts? Do those observations match your expectations?
 
 ```{r q5-task}
 ## TODO: Assign result to df_q5
+df_q5 <-
+  diamonds %>% 
+  group_by(cut)%>%
+  summarize(
+    price_mean = mean(price),
+    price_sd = sd(price),
+    price_cov = price_sd / price_mean
+  )
 df_q5
 ```
 
@@ -166,7 +204,8 @@ print("Excellent!")
 
 **Observations**:
 
-- Write your observations here!
+- Ideal diamonds have the lowest mean price
+- The coeff of variation for price is fairly high (80-101%), so it's likely that other variables effect price
 
 <!-- include-exit-ticket -->
 # Exit Ticket
