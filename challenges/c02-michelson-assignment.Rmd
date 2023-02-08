@@ -257,6 +257,8 @@ v_sd <-
   summarize(s = sd(VelocityVacuum)) %>%
   pull(s)
 
+mid<-mean(df_q2$Temp)
+
 ## Visualize
 set.seed(101)
 
@@ -327,10 +329,10 @@ df_q2 %>%
 
 - Unrelated to the assignment but I discovered this while making the graphs at the end, by you can install color palettes inspired by Wes Anderson movies
 ```{r}
-# Install
-install.packages("wesanderson")
-# Load
-library(wesanderson)
+# # Install
+# install.packages("wesanderson")
+# # Load
+# library(wesanderson)
 ```
 
 ## Bibliography
