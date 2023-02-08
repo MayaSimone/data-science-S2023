@@ -1,7 +1,7 @@
 ---
 title: "Michelson Speed-of-light Measurements"
-author: "(Your name here)"
-date: 2020-
+author: "(Maya Sivanandan)"
+date: 2023
 output:
   github_document:
     toc: true
@@ -65,6 +65,7 @@ df_michelson <-
   mutate(Distinctness = as_factor(Distinctness))
 
 df_michelson %>% glimpse
+
 ```
 
 *Data dictionary*:
@@ -84,17 +85,25 @@ df_michelson %>% glimpse
 
 ```{r q1-task}
 ## TODO: Compute summaries
-df_q1 <- NA
-df_q1 %>%
-  arrange(desc(Distinctness)) %>%
-  knitr::kable()
+df_q1 <-
+  df_michelson %>% 
+    group_by(Distinctness) %>% 
+    summarise(n = n(), MeanVelocity = mean(Velocity)) %>% 
+    arrange(desc(Distinctness))
+
+ df_q1
+
 ```
 
 **Observations**:
 - Write your observations here!
-  - (Your response here)
+  - There are more measured images with higher distinctness (With respect distinctness ratings 1:2:3, the ratio of number of pictures is about 1:2.5:3)
+  - The mean velocity of pictures with higher distinctness are closer to the true speed of light. This may be because more distinct images are more "correct" or because there are more of them, and therefore the mean is less likely to be affected by values with greater error.
+  
 - Why might your table differ from Michelson's?
-  - (Your response here)
+  - Michelson's velocity data seems to be rounded to 5 s.f. while the `mean()` function shows 7 s.f.
+  
+
 
 The `Velocity` values in the dataset are the speed of light *in air*; Michelson
 introduced a couple of adjustments to estimate the speed of light in a vacuum.
@@ -107,7 +116,11 @@ observations in the dataset.
 
 ```{r q2-task}
 ## TODO: Adjust the data, assign to df_q2
-df_q2 <- NA
+df_q2 <-
+  df_michelson %>% 
+  mutate(
+    VelocityVacuum = Velocity + 92
+  )
 
 df_q2
 ```
@@ -136,13 +149,18 @@ problems uncertainty includes some amount of human judgment.[2]
 ```{r q3-task}
 ## TODO: Compare Michelson's estimate and error against the true value
 ## Your code here!
+LIGHTSPEED_MICHELSON
+
+LIGHTSPEED_PM
+
+LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON
 ```
 
 **Observations**:
 - Is Michelson's estimate of the error (his uncertainty) greater or less than the true error?
-  - (Your response here)
+  - Less than (magnitude of about 100 vs 151)
 - Make a quantitative comparison between Michelson's uncertainty and his error.
-  - (Your response here)
+  - Michelson's was able to find some areas of potential errors, but since it is lower than actual error, he might not have considered/found them all
 
 The following plot shows all of Michelson's data as a [control chart](https://en.wikipedia.org/wiki/Control_chart); this sort of plot is common in manufacturing, where it is used to help determine if a manufacturing process is under [statistical control](https://en.wikipedia.org/wiki/Statistical_process_control). Each dot is one of Michelson's measurements, and the grey line connects the mean taken for each day. The same plot also shows simulated data using a probability model. We'll get into statistics later in the course; for now, let's focus on understanding what real and simulated data tend to look like.
 
@@ -203,24 +221,124 @@ df_q2 %>%
     x = "Date of Measurement (1879)",
     y = "Velocity (in Vacuum)"
   )
+
+```
+```{r}
+datenums <-
+  df_michelson %>% 
+    group_by(Date) %>% 
+    summarise(n = n()) %>% 
+    arrange(desc(Date))
+
+ datenums
 ```
 
 **Observations**:
 Similarities
-- (your responses here)
+- The mean measurements for each day seem to generally stay within the plus/minus bounds of Michelson's estimates.
+- The general trend of the two mean lines seem to match up. Michelson's data shows higher mean velocity 'peaks' on the same days the simulation does.
+- The region from June 14 to June 20 is when the mean lines from the two graphs are the most similar
+- The simulation seems to have generated the same number of values as measurements Michelson recorded on each day (i.e. There are 5 data points on each graph for June 9th)
+
 Differences
-- (your responses here)
+- Michelson's data seems to have more extreme outliers than the simulated data
+  - The simulated data seems to cluster near the true speed of light more than Michelson's data during the first half of the experiment (before June 18th)
+- The mean values that fell outside of the plus/minus bounds occurred earlier on in the Michelson data (June 9-13th), but later in the simulated data (June 26th and 30th)
 
 ### __q5__ You have access to a few other variables. Construct a few visualizations of `VelocityVacuum` against these other factors. Are there other patterns in the data that might help explain the difference between Michelson's estimate and `LIGHTSPEED_VACUUM`?
 
+```{r}
+v_mean <-
+  df_q2 %>%
+  summarize(m = mean(VelocityVacuum)) %>%
+  pull(m)
+v_sd <-
+  df_q2 %>%
+  summarize(s = sd(VelocityVacuum)) %>%
+  pull(s)
+
+## Visualize
+set.seed(101)
+
+
+df_q2 %>%
+  mutate(Simulated = rnorm(n(), mean = v_mean, sd = v_sd)) %>%
+  rename(Real = VelocityVacuum) %>%
+  pivot_longer(
+    cols = c(Simulated, Real),
+    names_to = "source",
+    values_to = "velocity"
+  ) %>%
+
+  ggplot(aes(Date, velocity)) +
+  geom_hline(
+    yintercept = LIGHTSPEED_MICHELSON,
+    linetype = "dotted"
+  ) +
+  geom_hline(
+    yintercept = LIGHTSPEED_MICHELSON - LIGHTSPEED_PM,
+    linetype = "dashed"
+  ) +
+  geom_hline(
+    yintercept = LIGHTSPEED_MICHELSON + LIGHTSPEED_PM,
+    linetype = "dashed"
+  ) +
+
+  geom_line(
+    data = . %>%
+      group_by(Date) %>%
+      summarize(velocity_mean = mean(velocity)),
+    mapping = aes(y = velocity_mean),
+    color = "grey50"
+  ) +
+  
+  # # Distinctness
+  # geom_point(
+  #   mapping = aes(Date, velocity, color = Distinctness),
+  #   size = 1.2
+  # ) +
+
+  # Temperature
+
+    geom_point(
+    mapping = aes(Date, velocity, color = Temp),
+    size = 1.2
+  ) +
+
+  scale_color_gradient2(
+    midpoint=mid, low="purple", mid="blue",high="red", space ="Lab"
+  ) +
+
+  theme_minimal() +
+  labs(
+    x = "Date of Measurement (1879)",
+    y = "Velocity (in Vacuum)"
+  )
+```
+
 **Observations**:
 
-- Make sure to record observations on your graphs!
+- It's hard to find specific trends related to level of distinctness because there aren't many measurements in the '1' category, and the level of distinctness seems to be determined by the day
+
+- It seems like higher temperatures can be related to the higher velocity measurements
 
 
+
+
+- Unrelated to the assignment but I discovered this while making the graphs at the end, by you can install color palettes inspired by Wes Anderson movies
+```{r}
+# Install
+install.packages("wesanderson")
+# Load
+library(wesanderson)
+```
 
 ## Bibliography
 
 - [1] Michelson, [Experimental Determination of the Velocity of Light](https://play.google.com/books/reader?id=343nAAAAMAAJ&hl=en&pg=GBS.PA115) (1880)
 - [2] Henrion and Fischhoff, [Assessing Uncertainty in Physical Constants](https://www.cmu.edu/epp/people/faculty/research/Fischoff-Henrion-Assessing%20uncertainty%20in%20physical%20constants.pdf) (1986)
 - [3] BYU video about a [Fizeau-Foucault apparatus](https://www.youtube.com/watch?v=Ik5ORaaeaME), similar to what Michelson used.
+- [4] Guide on [changing colors in ggplot2](http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually#gradient-colors-for-scatter-plots)
+
+
+
