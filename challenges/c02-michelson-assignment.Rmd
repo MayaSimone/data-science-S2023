@@ -153,14 +153,25 @@ LIGHTSPEED_MICHELSON
 
 LIGHTSPEED_PM
 
+upperBound <- LIGHTSPEED_MICHELSON + LIGHTSPEED_PM
+lowerBound <- LIGHTSPEED_MICHELSON - LIGHTSPEED_PM
+
 LIGHTSPEED_VACUUM - LIGHTSPEED_MICHELSON
+LIGHTSPEED_VACUUM - upperBound
+LIGHTSPEED_VACUUM - lowerBound
+
+((LIGHTSPEED_VACUUM - lowerBound)/LIGHTSPEED_VACUUM)*100
 ```
 
 **Observations**:
+
 - Is Michelson's estimate of the error (his uncertainty) greater or less than the true error?
-  - Less than (magnitude of about 100 vs 151)
+  - Less than 
+  
 - Make a quantitative comparison between Michelson's uncertainty and his error.
-  - Michelson's was able to find some areas of potential errors, but since it is lower than actual error, he might not have considered/found them all
+  - Michelson's uncertainty has a magnitude of 102 (plus/minus 51) while the true error has a magnitude of 151.542. 
+  - However, the true error is -151.542 (i.e. error is in the negative direction). Even when considering the lowest Michelson estimate (`LIGHTSPEED_MICHELSON - LIGHTSPEED_PM`), the error is -100.542 m/s.
+  - This may seem like a large difference, but 100 m/s is about 0.03% of the true speed of light in a vacuum, so it is actually fairly small.
 
 The following plot shows all of Michelson's data as a [control chart](https://en.wikipedia.org/wiki/Control_chart); this sort of plot is common in manufacturing, where it is used to help determine if a manufacturing process is under [statistical control](https://en.wikipedia.org/wiki/Statistical_process_control). Each dot is one of Michelson's measurements, and the grey line connects the mean taken for each day. The same plot also shows simulated data using a probability model. We'll get into statistics later in the course; for now, let's focus on understanding what real and simulated data tend to look like.
 
@@ -223,26 +234,27 @@ df_q2 %>%
   )
 
 ```
-```{r}
-datenums <-
-  df_michelson %>% 
-    group_by(Date) %>% 
-    summarise(n = n()) %>% 
-    arrange(desc(Date))
 
- datenums
-```
 
 **Observations**:
+
+
 Similarities
+
 - The mean measurements for each day seem to generally stay within the plus/minus bounds of Michelson's estimates.
+
 - The general trend of the two mean lines seem to match up. Michelson's data shows higher mean velocity 'peaks' on the same days the simulation does.
+
 - The region from June 14 to June 20 is when the mean lines from the two graphs are the most similar
+
 - The simulation seems to have generated the same number of values as measurements Michelson recorded on each day (i.e. There are 5 data points on each graph for June 9th)
 
+
 Differences
+
 - Michelson's data seems to have more extreme outliers than the simulated data
   - The simulated data seems to cluster near the true speed of light more than Michelson's data during the first half of the experiment (before June 18th)
+  
 - The mean values that fell outside of the plus/minus bounds occurred earlier on in the Michelson data (June 9-13th), but later in the simulated data (June 26th and 30th)
 
 ### __q5__ You have access to a few other variables. Construct a few visualizations of `VelocityVacuum` against these other factors. Are there other patterns in the data that might help explain the difference between Michelson's estimate and `LIGHTSPEED_VACUUM`?
@@ -257,6 +269,7 @@ v_sd <-
   summarize(s = sd(VelocityVacuum)) %>%
   pull(s)
 
+# For temp color scale
 mid<-mean(df_q2$Temp)
 
 ## Visualize
@@ -293,12 +306,6 @@ df_q2 %>%
     mapping = aes(y = velocity_mean),
     color = "grey50"
   ) +
-  
-  # # Distinctness
-  # geom_point(
-  #   mapping = aes(Date, velocity, color = Distinctness),
-  #   size = 1.2
-  # ) +
 
   # Temperature
 
@@ -308,7 +315,64 @@ df_q2 %>%
   ) +
 
   scale_color_gradient2(
-    midpoint=mid, low="purple", mid="blue",high="red", space ="Lab"
+    midpoint=mid, low="blue", mid="orange",high="green", space ="Lab"
+  ) +
+
+  theme_minimal() +
+  labs(
+    x = "Date of Measurement (1879)",
+    y = "Velocity (in Vacuum)"
+  )
+```
+```{r}
+v_mean <-
+  df_q2 %>%
+  summarize(m = mean(VelocityVacuum)) %>%
+  pull(m)
+v_sd <-
+  df_q2 %>%
+  summarize(s = sd(VelocityVacuum)) %>%
+  pull(s)
+
+## Visualize
+set.seed(101)
+
+
+df_q2 %>%
+  mutate(Simulated = rnorm(n(), mean = v_mean, sd = v_sd)) %>%
+  rename(Real = VelocityVacuum) %>%
+  pivot_longer(
+    cols = c(Simulated, Real),
+    names_to = "source",
+    values_to = "velocity"
+  ) %>%
+
+  ggplot(aes(Date, velocity)) +
+  geom_hline(
+    yintercept = LIGHTSPEED_MICHELSON,
+    linetype = "dotted"
+  ) +
+  geom_hline(
+    yintercept = LIGHTSPEED_MICHELSON - LIGHTSPEED_PM,
+    linetype = "dashed"
+  ) +
+  geom_hline(
+    yintercept = LIGHTSPEED_MICHELSON + LIGHTSPEED_PM,
+    linetype = "dashed"
+  ) +
+
+  geom_line(
+    data = . %>%
+      group_by(Date) %>%
+      summarize(velocity_mean = mean(velocity)),
+    mapping = aes(y = velocity_mean),
+    color = "grey50"
+  ) +
+  
+  # Distinctness
+  geom_point(
+    mapping = aes(Date, velocity, color = Distinctness),
+    size = 1.2
   ) +
 
   theme_minimal() +
@@ -318,16 +382,17 @@ df_q2 %>%
   )
 ```
 
+
 **Observations**:
 
-- It's hard to find specific trends related to level of distinctness because there aren't many measurements in the '1' category, and the level of distinctness seems to be determined by the day
+- It's hard to make a definitive statement, since lower temperatures (<70 degrees) did not happen often during the study (5 days), but the days with lower temperature seemed to have less measurements that fell outside of Michelson's PM bounds.
+  - Most of the velocity measurements that were higher than the upper bound of Michelson's uncertainty had higher temperatures (>75 degrees) 
+- There don't seem to be any specific correlations between level of distinctness and the velocity measured
+  - Most days seem to have a large majority of the measurements with the same level of distinctness. This could potentially be related to who operated the equipment in the experiment that day (ex. more experienced researchers took higher distinctness images)
 
-- It seems like higher temperatures can be related to the higher velocity measurements
 
 
-
-
-- Unrelated to the assignment but I discovered this while making the graphs at the end, by you can install color palettes inspired by Wes Anderson movies
+*Unrelated to the assignment but I discovered this while making the graphs at the end, by you can install color palettes inspired by Wes Anderson movies*
 ```{r}
 # # Install
 # install.packages("wesanderson")
