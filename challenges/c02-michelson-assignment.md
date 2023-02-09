@@ -547,7 +547,7 @@ df_q2 %>%
     operated the equipment in the experiment that day (ex. more
     experienced researchers took higher distinctness images)
 
-*Unrelated to the assignment but I discovered this while making the
+*Unrelated to the assignment, but I discovered this while making the
 graphs at the end, by you can install color palettes inspired by Wes
 Anderson movies*
 
