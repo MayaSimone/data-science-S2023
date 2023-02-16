@@ -533,15 +533,22 @@ df_q2 %>%
 
 **Observations**:
 
+-These are words, no space in between dash
+
+- This has the space
+
 - It’s hard to make a definitive statement, since lower temperatures
   (\<70 degrees) did not happen often during the study (5 days), but the
   days with lower temperature seemed to have less measurements that fell
   outside of Michelson’s PM bounds.
+
   - Most of the velocity measurements that were higher than the upper
     bound of Michelson’s uncertainty had higher temperatures (\>75
     degrees)
+
 - There don’t seem to be any specific correlations between level of
   distinctness and the velocity measured
+
   - Most days seem to have a large majority of the measurements with the
     same level of distinctness. This could potentially be related to who
     operated the equipment in the experiment that day (ex. more

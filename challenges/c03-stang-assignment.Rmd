@@ -1,7 +1,7 @@
 ---
 title: "Aluminum Data"
-author: "(Your name here)"
-date: 2020-
+author: "Maya Sivanandan"
+date: 2023
 output:
   github_document:
     toc: true
@@ -38,6 +38,7 @@ All the deliverables stated in the rubrics above are due **at midnight** before 
 
 ```{r setup}
 library(tidyverse)
+library(latex2exp)
 ```
 
 *Background*: In 1946, scientists at the Bureau of Standards tested a number of Aluminum plates to determine their [elasticity](https://en.wikipedia.org/wiki/Elastic_modulus) and [Poisson's ratio](https://en.wikipedia.org/wiki/Poisson%27s_ratio). These are key quantities used in the design of structural members, such as aircraft skin under [buckling loads](https://en.wikipedia.org/wiki/Buckling). These scientists tested plats of various thicknesses, and at different angles with respect to the [rolling](https://en.wikipedia.org/wiki/Rolling_(metalworking)) direction.
@@ -59,14 +60,24 @@ df_stang
 
 Note that these data are not tidy! The data in this form are convenient for reporting in a table, but are not ideal for analysis.
 
-### __q1__ Tidy `df_stang` to produce `df_stang_long`. You should have column names `thick, alloy, angle, E, nu`. Make sure the `angle` variable is of correct type. Filter out any invalid values.
+### __q1__ Tidy `df_stang` to produce `df_stang_long`. You should have column names `thick, alloy, angle, E, mu`. Make sure the `angle` variable is of correct type. Filter out any invalid values.
 
 *Hint*: You can reshape in one `pivot` using the `".value"` special value for `names_to`.
 
 ```{r q1-task}
 ## TASK: Tidy `df_stang`
 df_stang_long <-
-  df_stang
+  df_stang %>%
+    pivot_longer(
+      names_to = c(".value", "angle"),
+      names_sep = "_",
+      values_to = "val",
+      cols = c(-thick, -alloy)
+  ) %>%
+  mutate(angle = as.integer(angle))
+
+df_stang_long <- df_stang_long[df_stang_long$E >= 0, ]
+
 
 df_stang_long
 ```
@@ -101,20 +112,30 @@ print("Very good!")
 ### __q2__ Perform a basic EDA on the aluminum data *without visualization*. Use your analysis to answer the questions under *observations* below. In addition, add your own *specific* question that you'd like to answer about the data---you'll answer it below in q3.
 
 ```{r q2-task}
-##
+df_stang_long %>% 
+  summary()
+
+
+df_stang_long %>% 
+  # group_by(alloy) %>% 
+  # group_by(angle) %>% 
+  group_by(thick) %>% 
+  summarise(count = n())
 ```
 
 **Observations**:
 
 - Is there "one true value" for the material properties of Aluminum?
-  - (Your response here)
+  - No, in the data there seems to be some variation in the measurements of `E` and `nu` across the different samples. `E` varies from 10700 to 9900 and `nu` varies from 0.03100 to 0.3310
+  - Furthermore, even though elasticity and Poisson's Ratio are considered material properties (constant for a particular alloy), this isn't necessarily true to real life. The 'known' values are more a value that is representative of the dsitribution of possible values (based on the many aspects that can cause variation in these values from how the atoms are arranged to noise in a signal when collecting data digitally).
 - How many aluminum alloys are in this dataset? How do you know?
-  - (Your response here)
+  - One, the only alloy listed is `al_24st`
 - What angles were tested?
-  - (Your response here)
+  - 0, 45, 90 degrees
 - What thicknesses were tested?
-  - (Your response here)
-- (Write your own question here)
+  - 0.022, 0.032, 0.064, 0.081 inches
+- How does Poisson's ratio vary with respect to thickness?
+  - It's hard to make any definitive conclusions from the basic EDA.
 
 ## Visualize
 <!-- ------------------------- -->
@@ -122,12 +143,27 @@ print("Very good!")
 ### __q3__ Create a visualization to investigate your question from q2 above. Can you find an answer to your question using the dataset? Would you need additional information to answer your question?
 
 ```{r q3-task}
-## TASK: Investigate your question from q1 here
+# mid<-mean(df_q2$Temp)
+
+df_stang_long %>%
+  ggplot() +
+    geom_count(mapping = aes(x = thick, y = nu,
+                             color = after_stat(n), size = 1)) +
+  
+    guides(color = 'legend') +
+  
+    guides(size = FALSE) +
+  
+    labs(x = "Thickness (in)", y = TeX("Poisson's Ratio"), 
+         title = "Poisson's Ratio vs Thickness")
 ```
 
 **Observations**:
 
-- (Address your question from q1 here)
+- Poisson's ratio does not seem to vary with thickness. For the three smallest thicknesses, the majority of the measurements are between 0.317 and 0.330
+
+- The plot does show that the measurements of the 0.081in samples showed slightly lower Poisson ratios, so there may be some sort of relationship between Poisson's Ratio and thickness (perhaps something similar to a negative quadratic where the trend seems initially linear before decreasing). However, we only have the 0.081in measurements showing this downward trend, so this plot can not conclusively support the claim that Poisson's Ratio decreases with increased thickness of a material.
+
 
 ### __q4__ Consider the following statement:
 
@@ -147,7 +183,47 @@ df_stang_long %>%
 **Observations**:
 
 - Does this graph support or contradict the claim above?
-  - (Your response here)
+  - When first looking at the graph, it does seem to contradict the claim above, since the measurements of the thickest alloy samples (0.081in) are distinctly different from the others, existing in a separate cluster of data points with lower elasticity and Poisson's ratio. However, when reading the paper on how the measurements were collected, we find that the 0.081in samples were measured on a different apparatus than the other, thinner samples. This could be a source of systematic error, but more tests where all measurements are collected with the same piece of equipment (or all samples are measured on both apparatuses and compared) would be needed to determine if this is true. With the current data, this graph is not conclusive evidence disproving the claim.
+  
+
+
+**Graphs for Group Discussion**
+```{r presentation-graph-0} 
+df_stang_edit <- 
+  df_stang_long[df_stang_long$thick < 0.081, ]
+  
+
+df_stang_long %>%
+  ggplot() +
+    geom_count(mapping = aes(x = thick, y = E)) +
+  
+    geom_smooth(mapping = aes(x = thick, y = E), method = "lm") +
+  
+    geom_smooth(df_stang_edit, mapping = aes(x = thick, y = E, color = "red"),
+                method = "lm") +
+  
+    guides(color = FALSE) +
+  
+    labs(x = "Thickness (in)", y = TeX("Young's Modulus (Kips/ in $^ 2$)"), 
+         title = "Young's Modulus vs Thickness")
+      
+```
+
+```{r presentation-graph-1} 
+df_stang_long %>%
+  ggplot() +
+    geom_count(mapping = aes(x = thick, y = E)) +
+  
+    geom_smooth(mapping = aes(x = thick, y = E)) +
+  
+    geom_smooth(df_stang_edit, mapping = aes(x = thick, y = E, color = "red")) +
+  
+    guides(color = FALSE) +
+  
+    labs(x = "Thickness (in)", y = TeX("Young's Modulus (Kips/ in $^ 2$)"), 
+         title = "Young's Modulus vs Thickness")
+```
+
 
 # References
 <!-- -------------------------------------------------- -->
