@@ -1,7 +1,7 @@
 ---
 title: "COVID-19"
-author: "(Your name here)"
-date: 2020-
+author: "Maya Sivanandan"
+date: 2023
 output:
   github_document:
     toc: true
@@ -78,7 +78,31 @@ That's the high-level view; now let's dig into the details.
 
 ```{r q1-task}
 ## TASK: Load the census bureau data with the following tibble name.
-df_pop <- NA
+filename <- "./data/ACSDT5Y2018.B01003-Data.csv"
+col_names_ACS <-
+  c("id",
+    "Geographic Area Name",
+    "Estimate!!Total",
+    "Estimate!!Total-Annotate",
+    "Margin of Error!!Total",
+    "Margin of Error!!Total_Annotate"
+  )
+
+col_types_ACS = c(
+    "Estimate!!Total" = "numeric",
+    "Estimate!!Total-Annotate" = "numeric",
+    "Margin of Error!!Total" = "numeric",
+    "Margin of Error!!Total_Annotate" = "numeric")
+
+df_pop <- read_csv(filename, skip = 2, col_names = col_names_ACS, 
+                   col_types = col_types_ACS)
+
+df_pop[is.na(df_pop)] <- 0
+
+df_pop_narrow <- select(df_pop, -c("Estimate!!Total-Annotate", 
+                                  "Margin of Error!!Total_Annotate"))
+
+head(df_pop_narrow, 50)
 ```
 
 *Note*: You can find information on 1-year, 3-year, and 5-year estimates [here](https://www.census.gov/programs-surveys/acs/guidance/estimates.html). The punchline is that 5-year estimates are more reliable but less current.
@@ -94,7 +118,8 @@ The New York Times is publishing up-to-date data on COVID-19 on [GitHub](https:/
 
 ```{r q2-task}
 ## TASK: Find the URL for the NYT covid-19 county-level data
-url_counties <- NA_character_
+url_counties <- 
+  "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
 ```
 
 Once you have the url, the following code will download a local copy of the data, then load the data into R.
@@ -112,6 +137,8 @@ curl::curl_download(
 
 ## Loads the downloaded csv
 df_covid <- read_csv(filename_nyt)
+
+head(df_covid)
 ```
 
 You can now re-run the chunk above (or the entire notebook) to pull the most recent version of the data. Thus you can periodically re-run this notebook to check in on the pandemic as it evolves.
@@ -135,7 +162,8 @@ To join these datasets, we'll need to use [FIPS county codes](https://en.wikiped
 
 ```{r q3-task}
 ## TASK: Create a `fips` column by extracting the county code
-df_q3 <- NA
+df_q3 <- df_pop_narrow %>% 
+  mutate(fips = substr(id, nchar(id)-5+1, nchar(id)))
 ```
 
 Use the following test to check your answer.
@@ -155,7 +183,9 @@ print("Very good!")
 
 ```{r q4-task}
 ## TASK: Join df_covid and df_q3 by fips.
-df_q4 <- NA
+df_q4 <- inner_join(df_q3, df_covid, by = "fips")
+
+df_q4
 ```
 
 For convenience, I down-select some columns and produce more convenient column
@@ -174,6 +204,9 @@ df_data <-
     deaths,
     population = `Estimate!!Total`
   )
+
+df_data %>% 
+  summary()
 ```
 
 # Analyze
@@ -188,8 +221,24 @@ Now that we've done the hard work of loading and wrangling the data, we can fina
 
 ```{r q5-task}
 ## TASK: Normalize cases and deaths
+
 df_normalized <-
-  df_data
+  df_data %>% 
+  mutate(
+    cases_per100k = (cases/population)*100000,
+    deaths_per100k = (deaths/population)*100000
+  )
+
+
+enteries_per_date <-
+  df_normalized %>% 
+  group_by(date) %>%
+  mutate(
+    n = n(),
+    Total = sum(n)
+  )
+
+enteries_per_date
 ```
 
 You may use the following test to check your work.
@@ -235,21 +284,79 @@ Before turning you loose, let's complete a couple guided EDA tasks.
 
 ### __q6__ Compute the mean and standard deviation for `cases_per100k` and `deaths_per100k`.
 
+```{r}
+# 2020-01-21
+# 2021-04-23
+# 2022-05-13
+
+mean_sd1 <-
+  df_normalized %>% 
+  # filter(date == as.Date("2020-01-21") )
+  filter(date == lubridate::ymd("2020-05-13") |
+         date == lubridate::ymd("2021-05-13") |
+         date == lubridate::ymd("2022-05-13")) %>% 
+  group_by(date) %>% 
+  summarize(mean_cases_per100k = mean(cases_per100k, na.rm = TRUE),
+          sd_cases_per100k = sd(cases_per100k, na.rm = TRUE),
+          mean_deaths_per100k = mean(deaths_per100k, na.rm = TRUE),
+          sd_deaths_per100k = sd(deaths_per100k, na.rm = TRUE)
+          )
+
+mean_sd1
+```
+
+
 ```{r q6-task}
 ## TASK: Compute mean and sd for cases_per100k and deaths_per100k
+mean_sd_perCounty <-
+  df_normalized %>% 
+  group_by(state, county, fips) %>% 
+  summarize(mean_cases_per100k = mean(cases_per100k),
+          sd_cases_per100k = sd(cases_per100k),
+          mean_deaths_per100k = mean(deaths_per100k),
+          sd_deaths_per100k = sd(deaths_per100k)
+          ) %>% 
+  ungroup()
+
+
+mean_sd_perCounty
+
 ```
 
 ### __q7__ Find the top 10 counties in terms of `cases_per100k`, and the top 10 in terms of `deaths_per100k`. Report the population of each county along with the per-100,000 counts. Compare the counts against the mean values you found in q6. Note any observations.
 
 ```{r q7-task}
 ## TASK: Find the top 10 max cases_per100k counties; report populations as well
+top_cases <- 
+  df_normalized %>%
+    arrange(desc(cases_per100k)) %>% 
+    group_by(fips) %>%
+    slice(1) %>% 
+    arrange(desc(cases_per100k)) %>%
+    select(fips, county, state, population, cases_per100k, date) %>% 
+    head(10)
+
+top_cases
 
 ## TASK: Find the top 10 deaths_per100k counties; report populations as well
+top_deaths <- 
+  df_normalized %>%
+    arrange(desc(deaths_per100k)) %>% 
+    group_by(fips) %>%
+    slice(1) %>% 
+    arrange(desc(deaths_per100k)) %>% 
+    select(fips, county, state, population, deaths_per100k, date) %>% 
+    head(10)
+
+top_deaths
 ```
 
 **Observations**:
+- The values for `cases_per100k` and `deaths_per100k` for the top 10 counties in each category are significantly higher than the mean values (about 6X and about 7X greater, respectively)
+  - This variation is also demonstrated by the fairly high S.D. values (roughly the same at the mean)
+- The highest `cases_per100k` (Loving, Texas) is significantly greater than the mean value (over 19X greater)
+  - This is likely because the county has a very small population, so one case is a higher proportion of the population. This country also reported 94 more cases of covid then    its population at the time (196 vs 102)
 
-- (Note your observations here!)
 
 ## Self-directed EDA
 <!-- ------------------------- -->
@@ -268,6 +375,204 @@ Before turning you loose, let's complete a couple guided EDA tasks.
 
 **DO YOUR OWN ANALYSIS HERE**
 
+```{r self-EDA-data}
+top10_pop_fips <- 
+  df_normalized %>%
+    group_by(state, county, fips, population) %>% 
+    arrange(desc(population)) %>% 
+    group_by(fips) %>%
+    slice(1) %>% 
+    arrange(desc(population)) %>%
+    select(fips, county, state, population, cases_per100k, deaths_per100k, date) %>%
+    # select(fips) %>%
+    head(10)
+
+bot10_pop_fips <- 
+  df_normalized %>%
+    group_by(state, county, fips, population) %>% 
+    arrange(population) %>% 
+    group_by(fips) %>%
+    slice(1) %>% 
+    arrange(population) %>%
+    select(fips, county, state, population, cases_per100k, deaths_per100k, date) %>%
+    # select(fips) %>%
+    head(10)
+
+
+
+df_normalized %>%
+  group_by(fips) %>%
+  arrange(date) %>%
+  filter(fips == "48301") %>%
+  ggplot() +
+  geom_line(mapping = aes(date, cases, color = "Cumulative Cases")) +
+  geom_line(mapping = aes(date, population, color = "Population")) +
+  scale_y_log10(labels = scales::label_number_si()) +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Number of People Cases",
+    title = "Cumulative Cases of Loving, Texas"
+  )
+
+```
+
+**Observations:**
+
+When I finding the top 10 counties with the highest `cases_per100k`, I noticed that Loving, Texas had a value that was greater than 100,000, meaning that at some point (at least on 2022-05-12), the county had more covid cases than reported people living there. I was intrigued by this, so I did some external research. To my surprise, despite showing up at the county with the highest `cases_per100k`, the news articles about covid and Loving County all talked about how it was one of the last counties in America to have a reported covid case [4]. I then made the above graph to get a further look into how the covid cases progress over time in this county. The graph only starts around December of 2020, which correlates with what the article said since that is roughly a year after covid was first reported in America. Unlike many other counties in America, this county's largest covid spike started in December of 2021, which lines up with the occurance of the omicron variant. Seeing the interesting trends in reported cases for Loving County, I wanted to explore what trends and patterns are shown by other counties.
+
+
+```{r}
+df_normalized %>% 
+  group_by(fips) %>% 
+  arrange(date) %>% 
+  filter(fips == "06037"|
+         fips == "17031"|
+         fips == "48201"|
+         fips == "04013"|
+         fips == "06073"|
+         fips == "06059"|
+         fips == "12086"|
+         fips == "48113"|
+         fips == "06065"|
+         fips == "53033"
+         ) %>%
+  ggplot() +
+  geom_line(mapping = aes(date, cases, 
+                          color = fct_reorder2(county, date, cases))) +
+  scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Cumulative Cases",
+    title = "Cumulative Cases of 10 Largest Counties"
+  )
+
+df_normalized %>% 
+  group_by(fips) %>% 
+  arrange(population) %>%
+  filter(fips == "15005"|
+         fips == "48301"|
+         fips == "48269"|
+         fips == "31005"|
+         fips == "30069"|
+         fips == "31117"|
+         fips == "35021"|
+         fips == "31009"|
+         fips == "08111"|
+         fips == "31115"
+         ) %>%
+  ggplot() +
+  geom_line(mapping = aes(date, cases,
+                          color = fct_reorder2(county, date, cases))) +
+  scale_y_log10(labels = scales::label_number_si()) +
+  scale_color_discrete(name = "County") +
+  theme_minimal() +
+  labs(
+    x = "Date",
+    y = "Cumulative Cases",
+    title = "Cumulative Cases of 10 Smallest Counties"
+  )
+
+county_labels <- c("Los Angeles, CA", "Maricopa, AZ", "Miami-Dade, FL", "Cook, IL",
+                   "Harris, TX", "San Diego, CA", "Riverside, CA", "Orange, CA",
+                   "Dallas, TX", "King, WA", "San Juan, CO", "Loving, TX",
+                   "Harding, NM", "Loup, NE", "McPherson, NE", "Blaine, NE",
+                   "King, TX", "Petroleum, MT", "Arthur, NE", "Kalawao, HI")
+df_normalized %>% 
+  group_by(fips) %>% 
+  arrange(date) %>% 
+  filter(fips == "06037"|
+         fips == "17031"|
+         fips == "48201"|
+         fips == "04013"|
+         fips == "06073"|
+         fips == "06059"|
+         fips == "12086"|
+         fips == "48113"|
+         fips == "06065"|
+         fips == "53033"|
+         fips == "15005"|
+         fips == "48301"|
+         fips == "31005"|
+         fips == "30069"|
+         fips == "31117"|
+         fips == "35021"|
+         fips == "31009"|
+         fips == "08111"|
+         fips == "31115"|
+         fips == "48269"
+         ) %>%
+  ggplot() +
+  geom_line(mapping = aes(date, cases, color = fct_reorder2(fips, date, cases))) +
+  theme_minimal() +
+  scale_y_continuous(trans='log10') +
+  scale_color_discrete(name = "County", labels = county_labels) +
+  guides(color = guide_legend(override.aes = list(size = 1)))+
+  labs(
+    x = "Date",
+    y = "Cumulative Cases",
+    title = "Cumulative Cases of Largest and Smallest Counties"
+  )
+
+df_normalized %>% 
+  group_by(fips) %>% 
+  arrange(date) %>% 
+  filter(fips == "06037"|
+         fips == "17031"|
+         fips == "48201"|
+         fips == "04013"|
+         fips == "06073"|
+         fips == "06059"|
+         fips == "12086"|
+         fips == "48113"|
+         fips == "06065"|
+         fips == "53033"|
+         fips == "15005"|
+         fips == "48301"|
+         fips == "31005"|
+         fips == "30069"|
+         fips == "31117"|
+         fips == "35021"|
+         fips == "31009"|
+         fips == "08111"|
+         fips == "31115"|
+         fips == "48269"
+         ) %>%
+  ggplot() +
+  geom_line(mapping = aes(date, cases_per100k, 
+                          color = fct_reorder2(fips, date, cases_per100k))) +
+  theme_minimal() +
+  scale_y_continuous(trans='log10') +
+  scale_color_discrete(name = "County", labels = county_labels) +
+  guides(color = guide_legend(override.aes = list(size = 1)))+
+  labs(
+    x = "Date",
+    y = "Cumulative Cases per 100K",
+    title = "Cases per 100k of Smallest and Largest Counties"
+  )
+```
+
+
+**Observations:**
+To look into the trends in covid cases across different counties, I chose to look 10 counties with the largest populations and 10 counties with the smallest populations. I plotted their cumulative number of cases over time looking at just the large counties, just the small counties, and then all 20 on the same graph. 
+
+- The first thing I notice is that the larger counties (by population) have much smoother lines than the smaller counties
+  - I think these differences occur because smaller counties likely didn't need to update their data as frequently, as there were overall less people and therefore less cases to report
+- The larger countries also started collecting data on earlier dates (roughly February, 2020 for the larger counties and August, 2020 for the smaller)
+  -  It may have taken longer for covid to reach the smaller counties (like Loving, Texas) since they had less people for it to transmit between. They also tend to be more rural/isolated locations, so they were less likely to have the virus be brought in by someone traveling through.
+- Interestingly, the graph with both small and large counties shows that the smaller counties were more affected by the delta variant, as they show more significant increases in cases over the summer and late fall of 2021 as opposed to the larger counties which seem to be plateauing.[5]
+
+
+I then plotted `cases_per100k` for both the large and small counties on the same graph to look at the population-normalized trends.
+
+- The smaller counties first appear on the graph with fairly high `cases_per100k` values (>100) when compared to the larger counties (who start at or close to 0), since a single case for them is a large proportion of the population. This also means the sharp spike shown by the larger counties early in the pandemic (from 0-1000 `cases_per100k` from February to June, 2020) is not demonstrated by the smaller counties.
+- However, after the initial differences, the counties all show roughly similar trends with slight increases in December of 2020 and February of 2022, with plateaus in between.
+  - The increase in December of 2020 correlates with the alpha variant emergence[6], while February of 2022 correlates with the emergence of the omicron variant [7]
+  - It's also worth noting one particular outlier, Kalawao, Hawaii. This county doesn't show any of the trends of the other counties listed since it only had one reported case of covid. This is likely due to the county's extremely small population size (75), and also Hawaii's stricter covid restrictions. [8]
+
+
 ### Aside: Some visualization tricks
 <!-- ------------------------- -->
 
@@ -282,7 +587,7 @@ df_normalized %>%
     aes(date, cases_per100k, color = fct_reorder2(county, date, cases_per100k))
   ) +
   geom_line() +
-  scale_y_log10(labels = scales::label_number_si()) +
+  scale_y_log10(labels = scales::label_number()) +
   scale_color_discrete(name = "County") +
   theme_minimal() +
   labs(
@@ -313,3 +618,13 @@ The NYT repo documents some [geographic exceptions](https://github.com/nytimes/c
 [2] FIPS stands for [Federal Information Processing Standards](https://en.wikipedia.org/wiki/Federal_Information_Processing_Standards); these are computer standards issued by NIST for things such as government data.
 
 [3] Demographers often report statistics not in percentages (per 100 people), but rather in per 100,000 persons. This is [not always the case](https://stats.stackexchange.com/questions/12810/why-do-demographers-give-rates-per-100-000-people) though!
+
+[4] Loving County Texas was originally the [last county in the US to have zero reported covid cases](https://www.texasmonthly.com/news-politics/covid-loving-county/)
+
+[5] Information about the [delta variant of covid-19](https://health.ucdavis.edu/coronavirus/covid-19-information/delta-variant#:~:text=In%20the%20late%20summer%20and,in%20the%20fall%20of%202022.)
+
+[6] Information about the [different covid variants](https://www.yalemedicine.org/news/covid-19-variants-of-concern-omicron#:~:text=Alpha%20(B.1.1.7,in%20December%20of%20that%20year.)
+
+[7] Looking at the [omicron variant a year later](https://www.who.int/news-room/feature-stories/detail/one-year-since-the-emergence-of-omicron#:~:text=It%20was%2026%20November%202021,of%20the%20COVID%2D19%20pandemic.)
+
+[8] Covid restrictions in [Hawaii](https://www.hawaiipublicradio.org/local-news/2023-03-08/remembering-covid-shutdown-3-years-after-the-pandemic-began)
