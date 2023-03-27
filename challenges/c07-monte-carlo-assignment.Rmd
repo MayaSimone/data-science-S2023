@@ -1,7 +1,7 @@
 ---
 title: "Estimating Pi With a Shotgun"
-author: "(Your name here)"
-date: 2020-
+author: "Maya Sivanandan"
+date: 2023
 output:
   github_document:
     toc: true
@@ -101,15 +101,23 @@ Remember in `e-stat02-probability` we learned how to estimate probabilities as t
 
 ```{r q1-task}
 ## TASK: Choose a sample size and generate samples
-n <- NA_real_ # Choose a sample size
-df_q1 <- NA # Generate the data
+set.seed(739)
+
+n <- 500000 # Choose a sample size
+df_q1 <- tibble(
+  x = runif(n),
+  y = runif(n),
+  stat = ((x^2) + (y^2)) < 1
+)
+
 ```
 
 ### __q2__ Using your data in `df_q1`, estimate $\pi$.
 
 ```{r q2-task}
 ## TASK: Estimate pi using your data from q1
-pi_est <- NA_real_
+pi_est <- mean(df_q1$stat) * 4
+  
 pi_est
 ```
 
@@ -121,16 +129,31 @@ You now have an estimate of $\pi$, but how trustworthy is that estimate? In `e-s
 ### __q3__ Using a CLT approximation, produce a confidence interval for your estimate of $\pi$. Make sure you specify your confidence level. Does your interval include the true value of $\pi$? Was your chosen sample size sufficiently large so as to produce a trustworthy answer?
 
 ```{r q3-task}
+q95 <- qnorm( 1 - (1 - 0.95) / 2 )
+
+df_q3 <-
+  df_q1 %>% 
+  summarize(
+    mean = mean(stat),
+    sd = sd(stat),
+    se = sd/sqrt(n),
+    hi_pi = (mean + q95*se) * 4,
+    low_pi = (mean - q95*se) * 4
+  )
+
+df_q3
+
+df_q3$hi_pi - df_q3$low_pi
 ```
 
 **Observations**:
 
 - Does your interval include the true value of $\pi$?
-  - (Your response here)
+  - Yes, my interval is 3.137409 < pi < 3.146511, and the true pi value is within that range
 - What confidence level did you choose?
-  - (Your response here)
+  - I chose a 95% confidence interval since it is generally accepted that a p-value of less than 0.05 means the results are statistically significant[4] and the null hypothesis can be rejected (i.e. we can make the conclusion that the results are not due to random chance)
 - Was your sample size $n$ large enough? Why do you say that?
-  - (Your response here)
+  - I think my sample size (500,000) is large enough, as it was able to estimate pi within a range of about 0.0091 with a 95% confidence interval. The value generated does not have a specific purpose in real life (i.e. medical or aerospace, where a lack of precision can cost human lives), so this seems to be an adequate sample size.
 
 # References
 <!-- -------------------------------------------------- -->
@@ -140,3 +163,5 @@ You now have an estimate of $\pi$, but how trustworthy is that estimate? In `e-s
 [2] "How Mathematicians Used A Pump-Action Shotgun to Estimate Pi", [link](https://medium.com/the-physics-arxiv-blog/how-mathematicians-used-a-pump-action-shotgun-to-estimate-pi-c1eb776193ef)
 
 [3] Art Owen "Monte Carlo", [link](https://statweb.stanford.edu/~owen/mc/)
+
+[4] Statistically Significant [Confidence Intervals](https://www.investopedia.com/terms/c/confidenceinterval.asp#:~:text=In%20general%2C%20a%20p%2Dvalue,within%20a%2095%25%20confidence%20interval.)
