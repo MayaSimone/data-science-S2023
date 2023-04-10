@@ -1,7 +1,7 @@
 ---
 title: "US Income"
-author: "(Your name here)"
-date: 202X-XX-XX
+author: "Maya Sivanandan"
+date: 2023
 output:
   github_document:
     toc: true
@@ -49,7 +49,7 @@ library(tidyverse)
 
 ```{r q1-task}
 ## TODO: Give the filename for your copy of Table B01003
-filename_pop <- NA_character_
+filename_pop <- 'data/ACSDT5Y2018.B01003-Data.csv'
 
 ## NOTE: No need to edit
 df_pop <-
@@ -82,7 +82,7 @@ This means that for cases listed as `*****` the US Census Bureau recommends trea
 
 ```{r q2-task}
 ## TODO: Give the filename for your copy of Table S1903
-filename_income <- NA_character_
+filename_income <- 'data/ACSST5Y2018.S1903-Data.csv'
 
 ## NOTE: No need to edit
 df_income <-
@@ -96,7 +96,7 @@ Use the following test to check that you downloaded the correct file:
 ## NOTE: No need to edit, use to check you got the right file.
 assertthat::assert_that(
   df_income %>%
-    filter(id == "0500000US01001") %>%
+    filter(Geography == "0500000US01001") %>%
     pull(`Estimate!!Percent Distribution!!FAMILY INCOME BY FAMILY SIZE!!2-person families`)
   == 45.6
 )
@@ -115,13 +115,19 @@ This dataset is in desperate need of some *tidying*. To simplify the task, we'll
 df_q3 <-
   df_income %>%
   select(
-    id,
-    contains("Geographic"),
-    contains("median") & matches("\\d-person families")
+    contains("Geograph"),
+    contains("median") & matches("\\d-person families"),
+    -contains("Annotation")
   ) %>%
   mutate(across(contains("median"), as.numeric)) %>%
-## TODO: Pivot the data, rename the columns
-  glimpse()
+  pivot_longer(
+    names_pattern = "(Estimate|Margin of Error).*(\\d-person families)",
+    names_to = c(".value", "Category"),
+    cols = c(-contains("Geograph"))
+  )
+  # ) %>% 
+  # glimpse()
+df_q3
 ```
 
 Use the following tests to check your work:
@@ -130,13 +136,13 @@ Use the following tests to check your work:
 ## NOTE: No need to edit
 assertthat::assert_that(setequal(
   names(df_q3),
-  c("id", "geographic_area_name", "category", "income_estimate", "income_moe")
+  c("Geography", "Geographic Area Name", "Category", "Estimate", "Margin of Error")
 ))
 
 assertthat::assert_that(
   df_q3 %>%
-    filter(id == "0500000US01001", category == "2-person families") %>%
-    pull(income_moe)
+    filter(Geography == "0500000US01001", Category == "2-person families") %>%
+    pull(`Margin of Error`)
   == 6663
 )
 
@@ -152,7 +158,15 @@ $$\text{MOE} = 1.645 \times \text{SE}.$$
 
 ```{r q4-task}
 
-df_q4
+df_q4 <-
+  df_q3 %>% 
+  mutate(
+    income_SE = (`Margin of Error`/1.645),
+    income_lo = Estimate - (income_SE*2.576),
+    income_hi = Estimate + (income_SE*2.576),
+    income_CV = income_SE/Estimate
+  )
+
 ```
 
 Use the following tests to check your work:
@@ -161,14 +175,14 @@ Use the following tests to check your work:
 ## NOTE: No need to edit
 assertthat::assert_that(setequal(
   names(df_q4),
-  c("id", "geographic_area_name", "category", "income_estimate", "income_moe",
+  c("Geography", "Geographic Area Name", "Category", "Estimate", "Margin of Error",
     "income_SE", "income_lo", "income_hi", "income_CV")
 ))
 
 assertthat::assert_that(
   abs(
     df_q4 %>%
-    filter(id == "0500000US01001", category == "2-person families") %>%
+    filter(Geography == "0500000US01001", Category == "2-person families") %>%
     pull(income_SE) - 4050.456
   ) / 4050.456 < 1e-3
 )
@@ -176,7 +190,7 @@ assertthat::assert_that(
 assertthat::assert_that(
   abs(
     df_q4 %>%
-    filter(id == "0500000US01001", category == "2-person families") %>%
+    filter(Geography == "0500000US01001", Category == "2-person families") %>%
     pull(income_lo) - 54513.72
   ) / 54513.72 < 1e-3
 )
@@ -184,7 +198,7 @@ assertthat::assert_that(
 assertthat::assert_that(
   abs(
     df_q4 %>%
-    filter(id == "0500000US01001", category == "2-person families") %>%
+    filter(Geography == "0500000US01001", Category == "2-person families") %>%
     pull(income_hi) - 75380.28
   ) / 75380.28 < 1e-3
 )
@@ -192,7 +206,7 @@ assertthat::assert_that(
 assertthat::assert_that(
   abs(
     df_q4 %>%
-    filter(id == "0500000US01001", category == "2-person families") %>%
+    filter(Geography == "0500000US01001", Category == "2-person families") %>%
     pull(income_CV) - 0.06236556
   ) / 0.06236556 < 1e-3
 )
@@ -208,6 +222,15 @@ One last wrangling step: We need to join the two datasets so we can compare popu
 ```{r q5-task}
 ## TODO: Join df_q4 and df_pop by the appropriate column
 
+
+df_q4_id <-
+  df_q4 %>% 
+  rename(id = Geography)
+# df_q4_id
+# df_pop
+
+df_data <-
+  full_join(df_q4_id, df_pop, by = c("id"))
 df_data
 ```
 
@@ -226,10 +249,10 @@ df_data %>%
   filter(str_detect(geographic_area_name, "Massachusetts")) %>%
   mutate(
     county = str_remove(geographic_area_name, " County,.*$"),
-    county = fct_reorder(county, income_estimate)
+    county = fct_reorder(county, Estimate)
   ) %>%
 
-  ggplot(aes(county, income_estimate, color = category)) +
+  ggplot(aes(county, Estimate, color = Category)) +
   geom_errorbar(
     aes(ymin = income_lo, ymax = income_hi),
     position = position_dodge(width = wid)
@@ -246,13 +269,14 @@ df_data %>%
 **Observations**:
 
 - Document your observations here.
-  - (Your response here)
-  - (Your response here)
-  - ...
+  - Larger family data (5+ people) seems to have larger standard error than smaller families, likely because there are fewer samples
+  - Smaller families tend to have lower median household incomes. This could be because there are fewer contributors to household income or because people sometimes try to wait until they are more financially stable/have higher household incomes before they have children.
+    - The 6-person households seem to go against this trend, having their medians or margins of error be of a lower income than 4 or 5 (or even some 2 or 3) person households.
 - Can you confidently distinguish between household incomes in Suffolk county? Why or why not?
-  - (Your response here)
+  - No because the margins of error for each category overlap significantly (meaning the true values could be anywhere within those ranges), so we can't tell how family sizes affect median household income.
 - Which counties have the widest confidence intervals?
-  - (Your response here)
+  - Nantucket and Dukes since they have the largest margins of error compared to the same categories across the other counties.
+  - Hampshire and Berkshire also show large margins of error, but this is generally only for the 6-person family category
 
 In the next task you'll investigate the relationship between population and uncertainty.
 
@@ -261,14 +285,19 @@ In the next task you'll investigate the relationship between population and unce
 *Hint*: Remember that standard error is a function of *both* variability (e.g. variance) and sample size.
 
 ```{r q7-task}
+df_data %>% 
+  ggplot(aes(population_estimate, income_SE, color = Category)) +
+  geom_point() +
+  scale_y_log10(labels = scales::label_number_si())
+  
 ```
 
 **Observations**:
 
 - What *overall* trend do you see between `SE` and population? Why might this trend exist?
-  - (Your response here)
+  - Overall, there is a significant pattern with counties of smaller population having much higher standard error, showing a trend similar to an inverse relationship. This likely exists because standard error is the standard deviation divided by the square root of population, so smaller populations have a larger standard error.
 - What does this *overall* trend tell you about the relative ease of studying small vs large counties?
-  - (Your response here)
+  - It is likely easier to study large counties and have a smaller standard error, since the sample size can be a smaller proportional of the population (compared to a smaller county) and be more likely to have a smaller standard error than a smaller country. Standard error does not account for the ratio of sample size to population size.
 
 # Going Further
 <!-- ----------------------------------------------------------------------- -->
@@ -279,11 +308,57 @@ Now it's your turn! You have income data for every county in the United States: 
 
 ```{r q8-task}
 ## TODO: Pose and answer your own question about the data
+## Investigating how fertility rate impacts median household income
+
+wid <- 0.2
+
+df_data %>%
+  filter(str_detect(geographic_area_name, "Vermont")) %>%
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    county = fct_reorder(county, Estimate)
+  ) %>%
+
+  ggplot(aes(county, Estimate, color = Category)) +
+  geom_errorbar(
+    aes(ymin = income_lo, ymax = income_hi),
+    position = position_dodge(width = wid)
+  ) +
+  geom_point(position = position_dodge(width = wid)) +
+
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Median Household Income",
+    title = "Median Household Income (Vermont)"
+  )
+
+
+df_data %>%
+  filter(str_detect(geographic_area_name, "North Dakota")) %>%
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    county = fct_reorder(county, Estimate)
+  ) %>%
+
+  ggplot(aes(county, Estimate, color = Category)) +
+  geom_errorbar(
+    aes(ymin = income_lo, ymax = income_hi),
+    position = position_dodge(width = wid)
+  ) +
+  geom_point(position = position_dodge(width = wid)) +
+
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Median Household Income",
+    title = "Median Household Income (North Dakota)"
+  )
 ```
 
 **Observations**:
 
-- Document your observations here
+- My first observation is that North Dakota has significantly more counties than Vermont, despite having relatively similar population sizes (775k vs 645k). 
 
 Ideas:
 
