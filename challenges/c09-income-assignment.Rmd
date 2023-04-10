@@ -43,6 +43,8 @@ All the deliverables stated in the rubrics above are due **at midnight** before 
 
 ```{r setup}
 library(tidyverse)
+library(ggpubr)
+library("stringr") 
 ```
 
 ### __q1__ Load the population data from c06; simply replace `filename_pop` below.
@@ -310,7 +312,7 @@ Now it's your turn! You have income data for every county in the United States: 
 ## TODO: Pose and answer your own question about the data
 ## Investigating how fertility rate impacts median household income
 
-wid <- 0.2
+wid <- 0.5
 
 df_data %>%
   filter(str_detect(geographic_area_name, "Vermont")) %>%
@@ -325,6 +327,7 @@ df_data %>%
     position = position_dodge(width = wid)
   ) +
   geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
 
   coord_flip() +
   labs(
@@ -347,6 +350,7 @@ df_data %>%
     position = position_dodge(width = wid)
   ) +
   geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
 
   coord_flip() +
   labs(
@@ -355,10 +359,114 @@ df_data %>%
     title = "Median Household Income (North Dakota)"
   )
 ```
+```{r q8-2}
+# df_data %>%
+#   filter(str_detect(geographic_area_name, "North Dakota")) %>%
+#   arrange(desc(population_estimate))
+# 
+# df_data %>%
+#   filter(str_detect(geographic_area_name, "Vermont")) %>%
+#   arrange(desc(population_estimate))
+
+
+# plot_VT <-
+df_data %>%
+  filter(str_detect(geographic_area_name, "Vermont")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    county = fct_reorder(county, population_estimate)
+  ) %>%
+
+  ggplot(aes(county, Estimate, color = Category)) +
+  geom_errorbar(
+    aes(ymin = income_lo, ymax = income_hi),
+    position = position_dodge(width = wid)
+  ) +
+  geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
+
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Median Household Income",
+    title = "Median Household Income - 10 Largest VT Counties"
+  )
+
+# plot_ND <-
+df_data %>%
+  filter(str_detect(geographic_area_name, "North Dakota")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    county = fct_reorder(county, population_estimate)
+  ) %>%
+
+  ggplot(aes(county, Estimate, color = Category)) +
+  geom_errorbar(
+    aes(ymin = income_lo, ymax = income_hi),
+    position = position_dodge(width = wid)
+  ) +
+  geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
+
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Median Household Income",
+    title = "Median Household Income - 10 Largest ND Counties"
+  )
+
+
+df_data %>%
+  filter(str_detect(geographic_area_name, "Vermont")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+
+  ggplot(aes(Estimate, income_SE, color = Category)) +
+  geom_point() +
+  xlim(0, 130000) + 
+  labs(
+    x = "Median Household Income",
+    y = "Standard Error",
+    title = "Household Income vs SE - 10 Largest VT Counties"
+  )
+
+df_data %>%
+  filter(str_detect(geographic_area_name, "North Dakota")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+
+  ggplot(aes(Estimate, income_SE, color = Category)) +
+  geom_point() +
+  xlim(0, 130000) + 
+  labs(
+    x = "Median Household Income",
+    y = "Standard Error",
+    title = "Household Income vs SE - 10 Largest ND Counties"
+  )
+
+
+
+## I tried putting the two graphs into one figure for easier comparison, but it compressed the x-axis too much to make meaningful observations. It also managed to break multiple packages (including tidyverse) before working, so I'm keeping it here so it wasn't entirely useless.
+
+# figure <- ggarrange(plot_VT, plot_ND,
+#                     ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
+# figure
+
+```
+
 
 **Observations**:
 
-- My first observation is that North Dakota has significantly more counties than Vermont, despite having relatively similar population sizes (775k vs 645k). 
+- I chose to look at Vermont and North Dakota as these were the states with the lowest and highest fertility rates in 2020, respectively, and I wanted to see how that impacted median household income as well as the margins of error for various family sizes.
+- My first observation is that North Dakota has significantly more counties than Vermont (53 vs 14), despite having relatively similar population sizes (775k vs 645k). However, North Dakota is physically about 7 times larger than Vermont, so that is likely why it has more counties.
+  - The importance of this is that the 8 largest North Dakota counties have similar population sizes to the top 12 largest Vermont counties. Outside of that, the majority of the North Dakotan counties are significantly smaller than the majority of the Vermont counties, meaning they are likely to have larger standard error. For this reason, I then chose to look at the 10 largest counties in each state.
+- Vermont showed similar trends to Massachusetts with 2 and 3 person households generally having lower median incomes, and 6-person households generally having much greater margins of error. This makes sense as these are two fairly similar states, geographically and culturally.
+- It's hard to draw any conclusions about trends between median household income and family size for North Dakota because the margins of error are large enough to encompass the same ranges for a given county. 
+- Compared to North Dakota, the points graph of median income against standard error for Vermont are fairly clustered and show a general trend of smaller person households having lower median income and lower standard error. In contrast, North Dakota's are much more scattered and show less correlation between household size and standard error. This may be because in a state with a higher fertility rate, larger households are not as uncommon.
 
 Ideas:
 
@@ -368,6 +476,66 @@ Ideas:
   - Tidy the percentage columns to learn about how many households of each category are in each county.
 - Your own idea!
 
+
+
+
+```{r presentation}
+df_present <-
+  df_income %>%
+  select(
+    contains("Geograph"),
+    contains("median") & matches("!!FAMILIES"),
+    -contains("Annotation")
+  ) %>%
+  mutate(across(contains("median"), as.numeric)) %>%
+  pivot_longer(
+    names_pattern = "(Estimate|Margin of Error).*(With own children of householder under 18 years|With no own children of householder under 18 years|Married-couple families!!With own children under 18 years|Female householder, no husband present!!With own children under 18 years|Male householder, no wife present!!With own children under 18 years|Male householder, no wife present|Female householder, no husband present|Married-couple families)",
+    names_to = c(".value", "Category"),
+    cols = c(-contains("Geograph"))
+  ) %>% 
+  rename(
+	"id" = "Geography",
+  "geographic_area_name" = "Geographic Area Name",
+	"income_estimate" = "Estimate",
+	"income_moe" =  "Margin of Error"
+  ) %>%
+  mutate(
+	income_SE = income_moe/1.645,
+	income_lo = income_estimate - income_SE*2.576,
+	income_hi = income_estimate + income_SE*2.576,
+	income_CV = income_SE/income_estimate
+  ) %>% 
+  drop_na(Category)
+  # ) %>% 
+  # glimpse()
+# df_present
+
+
+df_present_full <- right_join(df_pop, df_present, by = c("id", "geographic_area_name"))
+
+```
+```{r variance}
+# Compute the analysis of variance
+res.aov <- aov(income_estimate ~ Category, data = df_present_full)
+# Summary of the analysis
+summary(res.aov)
+```
+
+```{r present-plot}
+
+df_present_full %>% 
+  drop_na(Category) %>% 
+  ggplot(aes(Category, income_estimate, color=Category))+
+  geom_boxplot(show.legend = FALSE) +
+  coord_flip() +
+  scale_x_discrete(labels = function(Category) str_wrap(Category, width = 28))+
+  labs(
+    y = "Median Household Income",
+    title = "Median Household Income by Family Structure",
+    title.position = "Center"
+  )
+
+```
 # References
 <!-- ----------------------------------------------------------------------- -->
 

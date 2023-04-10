@@ -51,7 +51,6 @@ Maya Sivanandan
     id="toc-q8-pose-your-own-question-about-the-data-create-a-visualization-or-table-here-and-document-your-observations"><strong>q8</strong>
     Pose your own question about the data. Create a visualization (or table)
     here, and document your observations.</a>
-- <a href="#references" id="toc-references">References</a>
 
 *Purpose*: We’ve been learning how to quantify uncertainty in estimates
 through the exercises; now its time to put those skills to use studying
@@ -105,14 +104,42 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.4.0      ✔ purrr   1.0.1 
-    ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.1      ✔ stringr 1.5.0 
-    ## ✔ readr   2.1.3      ✔ forcats 0.5.2 
+    ## Warning: package 'tidyverse' was built under R version 4.2.3
+
+    ## Warning: package 'ggplot2' was built under R version 4.2.3
+
+    ## Warning: package 'tibble' was built under R version 4.2.3
+
+    ## Warning: package 'tidyr' was built under R version 4.2.3
+
+    ## Warning: package 'readr' was built under R version 4.2.3
+
+    ## Warning: package 'dplyr' was built under R version 4.2.3
+
+    ## Warning: package 'forcats' was built under R version 4.2.3
+
+    ## Warning: package 'lubridate' was built under R version 4.2.3
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.1     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.1     
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
+
+``` r
+library(ggpubr)
+```
+
+    ## Warning: package 'ggpubr' was built under R version 4.2.3
+
+``` r
+library("stringr") 
+```
 
 ### **q1** Load the population data from c06; simply replace `filename_pop` below.
 
@@ -148,20 +175,19 @@ df_pop
 ```
 
     ## # A tibble: 3,220 × 6
-    ##    id             geographic_area_name     population_esti…¹ popul…² X5    X6   
-    ##    <chr>          <chr>                                <dbl> <chr>   <chr> <chr>
-    ##  1 0500000US01001 Autauga County, Alabama              55200 null    ***** *****
-    ##  2 0500000US01003 Baldwin County, Alabama             208107 null    ***** *****
-    ##  3 0500000US01005 Barbour County, Alabama              25782 null    ***** *****
-    ##  4 0500000US01007 Bibb County, Alabama                 22527 null    ***** *****
-    ##  5 0500000US01009 Blount County, Alabama               57645 null    ***** *****
-    ##  6 0500000US01011 Bullock County, Alabama              10352 null    ***** *****
-    ##  7 0500000US01013 Butler County, Alabama               20025 null    ***** *****
-    ##  8 0500000US01015 Calhoun County, Alabama             115098 null    ***** *****
-    ##  9 0500000US01017 Chambers County, Alabama             33826 null    ***** *****
-    ## 10 0500000US01019 Cherokee County, Alabama             25853 null    ***** *****
-    ## # … with 3,210 more rows, and abbreviated variable names ¹​population_estimate,
-    ## #   ²​population_moe
+    ##    id        geographic_area_name population_estimate population_moe X5    X6   
+    ##    <chr>     <chr>                              <dbl> <chr>          <chr> <chr>
+    ##  1 0500000U… Autauga County, Ala…               55200 null           ***** *****
+    ##  2 0500000U… Baldwin County, Ala…              208107 null           ***** *****
+    ##  3 0500000U… Barbour County, Ala…               25782 null           ***** *****
+    ##  4 0500000U… Bibb County, Alabama               22527 null           ***** *****
+    ##  5 0500000U… Blount County, Alab…               57645 null           ***** *****
+    ##  6 0500000U… Bullock County, Ala…               10352 null           ***** *****
+    ##  7 0500000U… Butler County, Alab…               20025 null           ***** *****
+    ##  8 0500000U… Calhoun County, Ala…              115098 null           ***** *****
+    ##  9 0500000U… Chambers County, Al…               33826 null           ***** *****
+    ## 10 0500000U… Cherokee County, Al…               25853 null           ***** *****
+    ## # ℹ 3,210 more rows
 
 You might wonder why the `Margin of Error` in the population estimates
 is listed as `*****`. From the [documentation (PDF
@@ -218,25 +244,25 @@ df_income
 ```
 
     ## # A tibble: 3,220 × 483
-    ##    Geography     Geogr…¹ Estim…² Margi…³ Annot…⁴ Annot…⁵ Estim…⁶ Margi…⁷ Annot…⁸
-    ##    <chr>         <chr>     <dbl>   <dbl> <chr>   <chr>     <dbl>   <dbl> <chr>  
-    ##  1 0500000US010… Autaug…   21115     383 null    null      16585     363 null   
-    ##  2 0500000US010… Baldwi…   78622    1183 null    null      69544    1042 null   
-    ##  3 0500000US010… Barbou…    9186     280 null    null       4729     211 null   
-    ##  4 0500000US010… Bibb C…    6840     321 null    null       5588     346 null   
-    ##  5 0500000US010… Blount…   20600     396 null    null      20054     417 null   
-    ##  6 0500000US010… Bulloc…    3609     196 null    null        881     119 null   
-    ##  7 0500000US010… Butler…    6708     274 null    null       3821     173 null   
-    ##  8 0500000US010… Calhou…   45033     683 null    null      33820     559 null   
-    ##  9 0500000US010… Chambe…   13516     372 null    null       7953     296 null   
-    ## 10 0500000US010… Cherok…   10606     370 null    null       9953     356 null   
-    ## # … with 3,210 more rows, 474 more variables:
-    ## #   `Annotation of Estimate!!Number!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households!!One race--!!White` <chr>,
-    ## #   `Estimate!!Number!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households!!One race--!!Black or African American` <dbl>,
-    ## #   `Annotation of Estimate!!Number!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households!!One race--!!Black or African American` <chr>,
-    ## #   `Margin of Error!!Number MOE!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households!!One race--!!Black or African American` <dbl>,
-    ## #   `Annotation of Margin of Error!!Number MOE!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households!!One race--!!Black or African American` <chr>,
-    ## #   `Estimate!!Number!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households!!One race--!!American Indian and Alaska Native` <dbl>, …
+    ##    Geography      `Geographic Area Name`   Estimate!!Number!!HOUSEHOLD INCOME …¹
+    ##    <chr>          <chr>                                                    <dbl>
+    ##  1 0500000US01001 Autauga County, Alabama                                  21115
+    ##  2 0500000US01003 Baldwin County, Alabama                                  78622
+    ##  3 0500000US01005 Barbour County, Alabama                                   9186
+    ##  4 0500000US01007 Bibb County, Alabama                                      6840
+    ##  5 0500000US01009 Blount County, Alabama                                   20600
+    ##  6 0500000US01011 Bullock County, Alabama                                   3609
+    ##  7 0500000US01013 Butler County, Alabama                                    6708
+    ##  8 0500000US01015 Calhoun County, Alabama                                  45033
+    ##  9 0500000US01017 Chambers County, Alabama                                 13516
+    ## 10 0500000US01019 Cherokee County, Alabama                                 10606
+    ## # ℹ 3,210 more rows
+    ## # ℹ abbreviated name:
+    ## #   ¹​`Estimate!!Number!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households`
+    ## # ℹ 480 more variables:
+    ## #   `Margin of Error!!Number MOE!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households` <dbl>,
+    ## #   `Annotation of Margin of Error!!Number MOE!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households` <chr>,
+    ## #   `Annotation of Estimate!!Number!!HOUSEHOLD INCOME BY RACE AND HISPANIC OR LATINO ORIGIN OF HOUSEHOLDER!!Households` <chr>, …
 
 Use the following test to check that you downloaded the correct file:
 
@@ -285,21 +311,12 @@ df_q3 <-
   )
 ```
 
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
-
-    ## Warning in mask$eval_all_mutate(quo): NAs introduced by coercion
+    ## Warning: There were 8 warnings in `mutate()`.
+    ## The first warning was:
+    ## ℹ In argument: `across(contains("median"), as.numeric)`.
+    ## Caused by warning:
+    ## ! NAs introduced by coercion
+    ## ℹ Run ]8;;ide:run:dplyr::last_dplyr_warnings()dplyr::last_dplyr_warnings()]8;; to see the 7 remaining warnings.
 
 ``` r
   # ) %>% 
@@ -308,19 +325,19 @@ df_q3
 ```
 
     ## # A tibble: 16,100 × 5
-    ##    Geography      `Geographic Area Name`  Category          Estimate Margin of…¹
-    ##    <chr>          <chr>                   <chr>                <dbl>       <dbl>
-    ##  1 0500000US01001 Autauga County, Alabama 2-person families    64947        6663
-    ##  2 0500000US01001 Autauga County, Alabama 3-person families    80172       14181
-    ##  3 0500000US01001 Autauga County, Alabama 4-person families    85455       10692
-    ##  4 0500000US01001 Autauga County, Alabama 5-person families    88601       20739
-    ##  5 0500000US01001 Autauga County, Alabama 6-person families   103787       12387
-    ##  6 0500000US01003 Baldwin County, Alabama 2-person families    63975        2297
-    ##  7 0500000US01003 Baldwin County, Alabama 3-person families    79390        8851
-    ##  8 0500000US01003 Baldwin County, Alabama 4-person families    88458        5199
-    ##  9 0500000US01003 Baldwin County, Alabama 5-person families    91259        7011
-    ## 10 0500000US01003 Baldwin County, Alabama 6-person families    69609       23175
-    ## # … with 16,090 more rows, and abbreviated variable name ¹​`Margin of Error`
+    ##    Geography      `Geographic Area Name`  Category    Estimate `Margin of Error`
+    ##    <chr>          <chr>                   <chr>          <dbl>             <dbl>
+    ##  1 0500000US01001 Autauga County, Alabama 2-person f…    64947              6663
+    ##  2 0500000US01001 Autauga County, Alabama 3-person f…    80172             14181
+    ##  3 0500000US01001 Autauga County, Alabama 4-person f…    85455             10692
+    ##  4 0500000US01001 Autauga County, Alabama 5-person f…    88601             20739
+    ##  5 0500000US01001 Autauga County, Alabama 6-person f…   103787             12387
+    ##  6 0500000US01003 Baldwin County, Alabama 2-person f…    63975              2297
+    ##  7 0500000US01003 Baldwin County, Alabama 3-person f…    79390              8851
+    ##  8 0500000US01003 Baldwin County, Alabama 4-person f…    88458              5199
+    ##  9 0500000US01003 Baldwin County, Alabama 5-person f…    91259              7011
+    ## 10 0500000US01003 Baldwin County, Alabama 6-person f…    69609             23175
+    ## # ℹ 16,090 more rows
 
 Use the following tests to check your work:
 
@@ -458,22 +475,22 @@ df_data
 ```
 
     ## # A tibble: 16,100 × 14
-    ##    id    Geogr…¹ Categ…² Estim…³ Margi…⁴ incom…⁵ incom…⁶ incom…⁷ incom…⁸ geogr…⁹
-    ##    <chr> <chr>   <chr>     <dbl>   <dbl>   <dbl>   <dbl>   <dbl>   <dbl> <chr>  
-    ##  1 0500… Autaug… 2-pers…   64947    6663   4050.  54513.  75381.  0.0624 Autaug…
-    ##  2 0500… Autaug… 3-pers…   80172   14181   8621.  57965. 102379.  0.108  Autaug…
-    ##  3 0500… Autaug… 4-pers…   85455   10692   6500.  68712. 102198.  0.0761 Autaug…
-    ##  4 0500… Autaug… 5-pers…   88601   20739  12607.  56125. 121077.  0.142  Autaug…
-    ##  5 0500… Autaug… 6-pers…  103787   12387   7530.  84389. 123185.  0.0726 Autaug…
-    ##  6 0500… Baldwi… 2-pers…   63975    2297   1396.  60378.  67572.  0.0218 Baldwi…
-    ##  7 0500… Baldwi… 3-pers…   79390    8851   5381.  65530.  93250.  0.0678 Baldwi…
-    ##  8 0500… Baldwi… 4-pers…   88458    5199   3160.  80317.  96599.  0.0357 Baldwi…
-    ##  9 0500… Baldwi… 5-pers…   91259    7011   4262.  80280. 102238.  0.0467 Baldwi…
-    ## 10 0500… Baldwi… 6-pers…   69609   23175  14088.  33318. 105900.  0.202  Baldwi…
-    ## # … with 16,090 more rows, 4 more variables: population_estimate <dbl>,
-    ## #   population_moe <chr>, X5 <chr>, X6 <chr>, and abbreviated variable names
-    ## #   ¹​`Geographic Area Name`, ²​Category, ³​Estimate, ⁴​`Margin of Error`,
-    ## #   ⁵​income_SE, ⁶​income_lo, ⁷​income_hi, ⁸​income_CV, ⁹​geographic_area_name
+    ##    id       `Geographic Area Name` Category Estimate `Margin of Error` income_SE
+    ##    <chr>    <chr>                  <chr>       <dbl>             <dbl>     <dbl>
+    ##  1 0500000… Autauga County, Alaba… 2-perso…    64947              6663     4050.
+    ##  2 0500000… Autauga County, Alaba… 3-perso…    80172             14181     8621.
+    ##  3 0500000… Autauga County, Alaba… 4-perso…    85455             10692     6500.
+    ##  4 0500000… Autauga County, Alaba… 5-perso…    88601             20739    12607.
+    ##  5 0500000… Autauga County, Alaba… 6-perso…   103787             12387     7530.
+    ##  6 0500000… Baldwin County, Alaba… 2-perso…    63975              2297     1396.
+    ##  7 0500000… Baldwin County, Alaba… 3-perso…    79390              8851     5381.
+    ##  8 0500000… Baldwin County, Alaba… 4-perso…    88458              5199     3160.
+    ##  9 0500000… Baldwin County, Alaba… 5-perso…    91259              7011     4262.
+    ## 10 0500000… Baldwin County, Alaba… 6-perso…    69609             23175    14088.
+    ## # ℹ 16,090 more rows
+    ## # ℹ 8 more variables: income_lo <dbl>, income_hi <dbl>, income_CV <dbl>,
+    ## #   geographic_area_name <chr>, population_estimate <dbl>,
+    ## #   population_moe <chr>, X5 <chr>, X6 <chr>
 
 # Analysis
 
@@ -509,6 +526,13 @@ df_data %>%
     y = "Median Household Income"
   )
 ```
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `county = fct_reorder(county, Estimate)`.
+    ## Caused by warning:
+    ## ! `fct_reorder()` removing 2 missing values.
+    ## ℹ Use `.na_rm = TRUE` to silence this message.
+    ## ℹ Use `.na_rm = FALSE` to preserve NAs.
 
     ## Warning: Removed 2 rows containing missing values (`geom_point()`).
 
@@ -555,6 +579,9 @@ df_data %>%
 
     ## Warning: `label_number_si()` was deprecated in scales 1.2.0.
     ## ℹ Please use the `scale_cut` argument of `label_number()` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
     ## Warning: Removed 814 rows containing missing values (`geom_point()`).
 
@@ -591,7 +618,7 @@ States: Pose your own question and try to answer it with the data.
 ## TODO: Pose and answer your own question about the data
 ## Investigating how fertility rate impacts median household income
 
-wid <- 0.2
+wid <- 0.5
 
 df_data %>%
   filter(str_detect(geographic_area_name, "Vermont")) %>%
@@ -606,6 +633,7 @@ df_data %>%
     position = position_dodge(width = wid)
   ) +
   geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
 
   coord_flip() +
   labs(
@@ -631,6 +659,7 @@ df_data %>%
     position = position_dodge(width = wid)
   ) +
   geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
 
   coord_flip() +
   labs(
@@ -640,15 +669,162 @@ df_data %>%
   )
 ```
 
-    ## Warning: Removed 25 rows containing missing values (`geom_point()`).
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `county = fct_reorder(county, Estimate)`.
+    ## Caused by warning:
+    ## ! `fct_reorder()` removing 25 missing values.
+    ## ℹ Use `.na_rm = TRUE` to silence this message.
+    ## ℹ Use `.na_rm = FALSE` to preserve NAs.
+
+    ## Warning: Removed 28 rows containing missing values (`geom_point()`).
 
 ![](c09-income-assignment_files/figure-gfm/q8-task-2.png)<!-- -->
 
+``` r
+# df_data %>%
+#   filter(str_detect(geographic_area_name, "North Dakota")) %>%
+#   arrange(desc(population_estimate))
+# 
+# df_data %>%
+#   filter(str_detect(geographic_area_name, "Vermont")) %>%
+#   arrange(desc(population_estimate))
+
+
+# plot_VT <-
+df_data %>%
+  filter(str_detect(geographic_area_name, "Vermont")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    county = fct_reorder(county, population_estimate)
+  ) %>%
+
+  ggplot(aes(county, Estimate, color = Category)) +
+  geom_errorbar(
+    aes(ymin = income_lo, ymax = income_hi),
+    position = position_dodge(width = wid)
+  ) +
+  geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
+
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Median Household Income",
+    title = "Median Household Income - 10 Largest VT Counties"
+  )
+```
+
+![](c09-income-assignment_files/figure-gfm/q8-2-1.png)<!-- -->
+
+``` r
+# plot_ND <-
+df_data %>%
+  filter(str_detect(geographic_area_name, "North Dakota")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    county = fct_reorder(county, population_estimate)
+  ) %>%
+
+  ggplot(aes(county, Estimate, color = Category)) +
+  geom_errorbar(
+    aes(ymin = income_lo, ymax = income_hi),
+    position = position_dodge(width = wid)
+  ) +
+  geom_point(position = position_dodge(width = wid)) +
+  ylim(0, 160000) + 
+
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Median Household Income",
+    title = "Median Household Income - 10 Largest ND Counties"
+  )
+```
+
+![](c09-income-assignment_files/figure-gfm/q8-2-2.png)<!-- -->
+
+``` r
+df_data %>%
+  filter(str_detect(geographic_area_name, "Vermont")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+
+  ggplot(aes(Estimate, income_SE, color = Category)) +
+  geom_point() +
+  xlim(0, 130000) + 
+  labs(
+    x = "Median Household Income",
+    y = "Standard Error",
+    title = "Household Income vs SE - 10 Largest VT Counties"
+  )
+```
+
+![](c09-income-assignment_files/figure-gfm/q8-2-3.png)<!-- -->
+
+``` r
+df_data %>%
+  filter(str_detect(geographic_area_name, "North Dakota")) %>%
+  arrange(desc(population_estimate)) %>% 
+  head(50) %>% 
+
+  ggplot(aes(Estimate, income_SE, color = Category)) +
+  geom_point() +
+  xlim(0, 130000) + 
+  labs(
+    x = "Median Household Income",
+    y = "Standard Error",
+    title = "Household Income vs SE - 10 Largest ND Counties"
+  )
+```
+
+![](c09-income-assignment_files/figure-gfm/q8-2-4.png)<!-- -->
+
+``` r
+## I tried putting the two graphs into one figure for easier comparison, but it compressed the x-axis too much to make meaningful observations. It also managed to break multiple packages (including tidyverse) before working, so I'm keeping it here so it wasn't entirely useless.
+
+# figure <- ggarrange(plot_VT, plot_ND,
+#                     ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
+# figure
+```
+
 **Observations**:
 
+- I chose to look at Vermont and North Dakota as these were the states
+  with the lowest and highest fertility rates in 2020, respectively, and
+  I wanted to see how that impacted median household income as well as
+  the margins of error for various family sizes.
 - My first observation is that North Dakota has significantly more
-  counties than Vermont, despite having relatively similar population
-  sizes (775k vs 645k).
+  counties than Vermont (53 vs 14), despite having relatively similar
+  population sizes (775k vs 645k). However, North Dakota is physically
+  about 7 times larger than Vermont, so that is likely why it has more
+  counties.
+  - The importance of this is that the 8 largest North Dakota counties
+    have similar population sizes to the top 12 largest Vermont
+    counties. Outside of that, the majority of the North Dakotan
+    counties are significantly smaller than the majority of the Vermont
+    counties, meaning they are likely to have larger standard error. For
+    this reason, I then chose to look at the 10 largest counties in each
+    state.
+- Vermont showed similar trends to Massachusetts with 2 and 3 person
+  households generally having lower median incomes, and 6-person
+  households generally having much greater margins of error. This makes
+  sense as these are two fairly similar states, geographically and
+  culturally.
+- It’s hard to draw any conclusions about trends between median
+  household income and family size for North Dakota because the margins
+  of error are large enough to encompass the same ranges for a given
+  county.
+- Compared to North Dakota, the points graph of median income against
+  standard error for Vermont are fairly clustered and show a general
+  trend of smaller person households having lower median income and
+  lower standard error. In contrast, North Dakota’s are much more
+  scattered and show less correlation between household size and
+  standard error. This may be because in a state with a higher fertility
+  rate, larger households are not as uncommon.
 
 Ideas:
 
@@ -661,8 +837,83 @@ Ideas:
     each category are in each county.
 - Your own idea!
 
-# References
+``` r
+df_present <-
+  df_income %>%
+  select(
+    contains("Geograph"),
+    contains("median") & matches("!!FAMILIES"),
+    -contains("Annotation")
+  ) %>%
+  mutate(across(contains("median"), as.numeric)) %>%
+  pivot_longer(
+    names_pattern = "(Estimate|Margin of Error).*(With own children of householder under 18 years|With no own children of householder under 18 years|Married-couple families!!With own children under 18 years|Female householder, no husband present!!With own children under 18 years|Male householder, no wife present!!With own children under 18 years|Male householder, no wife present|Female householder, no husband present|Married-couple families)",
+    names_to = c(".value", "Category"),
+    cols = c(-contains("Geograph"))
+  ) %>% 
+  rename(
+    "id" = "Geography",
+  "geographic_area_name" = "Geographic Area Name",
+    "income_estimate" = "Estimate",
+    "income_moe" =  "Margin of Error"
+  ) %>%
+  mutate(
+    income_SE = income_moe/1.645,
+    income_lo = income_estimate - income_SE*2.576,
+    income_hi = income_estimate + income_SE*2.576,
+    income_CV = income_SE/income_estimate
+  ) %>% 
+  drop_na(Category)
+```
 
+    ## Warning: There were 12 warnings in `mutate()`.
+    ## The first warning was:
+    ## ℹ In argument: `across(contains("median"), as.numeric)`.
+    ## Caused by warning:
+    ## ! NAs introduced by coercion
+    ## ℹ Run ]8;;ide:run:dplyr::last_dplyr_warnings()dplyr::last_dplyr_warnings()]8;; to see the 11 remaining warnings.
+
+``` r
+  # ) %>% 
+  # glimpse()
+# df_present
+
+
+df_present_full <- right_join(df_pop, df_present, by = c("id", "geographic_area_name"))
+```
+
+``` r
+# Compute the analysis of variance
+res.aov <- aov(income_estimate ~ Category, data = df_present_full)
+# Summary of the analysis
+summary(res.aov)
+```
+
+    ##                Df    Sum Sq   Mean Sq F value Pr(>F)    
+    ## Category        7 8.616e+12 1.231e+12    4961 <2e-16 ***
+    ## Residuals   24743 6.139e+12 2.481e+08                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 1009 observations deleted due to missingness
+
+``` r
+df_present_full %>% 
+  drop_na(Category) %>% 
+  ggplot(aes(Category, income_estimate, color=Category))+
+  geom_boxplot(show.legend = FALSE) +
+  coord_flip() +
+  scale_x_discrete(labels = function(Category) str_wrap(Category, width = 28))+
+  labs(
+    y = "Median Household Income",
+    title = "Median Household Income by Family Structure",
+    title.position = "Center"
+  )
+```
+
+    ## Warning: Removed 1009 rows containing non-finite values (`stat_boxplot()`).
+
+![](c09-income-assignment_files/figure-gfm/present-plot-1.png)<!-- -->
+\# References
 <!-- ----------------------------------------------------------------------- -->
 
 \[1\] Spielman SE, Folch DC, Nagle NN (2014) Patterns and causes of
