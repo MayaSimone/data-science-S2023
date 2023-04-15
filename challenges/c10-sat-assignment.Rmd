@@ -57,9 +57,14 @@ All the deliverables stated in the rubrics above are due **at midnight** before 
 
 ```{r q1-task}
 ## TODO:
-df_sat <- NA
+df_sat <- read_xls('data/sat.xls')
 
 ## TODO: Do your "first checks"
+df_sat
+df_sat %>% 
+  glimpse()
+
+
 ```
 
 **Observations**:
@@ -68,18 +73,18 @@ df_sat <- NA
 
 | Column     | Meaning |
 |------------|---------|
-| `high_GPA` | ???     |
-| `math_SAT` | ???     |
-| `verb_SAT` | ???     |
-| `comp_GPA` | ???     |
-| `univ_GPA` | ???     |
+| `high_GPA` | High School GPA     |
+| `math_SAT` |Math SAT Score     |
+| `verb_SAT` | Verbal SAT Score    |
+| `comp_GPA` | Computer Science GPA     |
+| `univ_GPA` | Overall University GPA     |
 
 - What information do we have about these students?
-  - (Your response here)
+  - They are 105 students who graduated from a state university with a BSC in Computer Science. We have their high school GPA, SAT scores, and CS/general university GPAs
 - What kinds of information *do we not have* about these students?
-  - (Your response here)
+  - What extracurriculars they did, where they're from, why they chose CS as a major, what their family life is/was like, what their financial situation was like (did they have to work during HS/uni?), did they have a tutor in HS or uni, were they sick on the day of the SAT, did anything significant happen in HS/Uni to affect GPA?
 - Based on these missing variables, what possible effects could be present in the data that we would have *no way of detecting*?
-  - (Your response here)
+  - There are so many external variables that could have made a student have a higher or lower GPA/SAT score. For example, a student that was tutored for the SAT and was perfectly healthy on the day of the test has a better chance to score well than a student who had to use their free time to look after their sibling and caught a cold just before the test. However, it's equally true that a student who spent all they're free time study would have been able to test best than a student who was simply uninterested in studying. There's no way for us to know what factors contributed to any of these scores.
 
 # Analysis with Hypothesis Testing
 <!-- ----------------------------------------------------------------------- -->
@@ -104,6 +109,8 @@ df_composite <-
 
 ```{r q2-task}
 ## TODO:
+df_composite %>% 
+  ggplot
 ```
 
 **Observations**:
@@ -150,6 +157,10 @@ Keep in mind your findings as you complete q4.
 ## TODO: Use the function cor.test() to test the correlations between
 ##       high_GPA and univ_GPA, as well as between
 ##       both_SAT and univ_GPA
+cor.test(df_composite$high_GPA, 
+         df_composite$univ_GPA, 
+         alternative = "two.sided",
+         method = "pearson")
 ```
 
 **Observations**:
