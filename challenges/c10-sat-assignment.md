@@ -424,6 +424,14 @@ corr_SAT_univ
     ##       cor 
     ## 0.6846776
 
+``` r
+corr_SAT_univ[4]
+```
+
+    ## $estimate
+    ##       cor 
+    ## 0.6846776
+
 **Observations**:
 
 - Which correlations are significantly nonzero?
@@ -448,102 +456,61 @@ Finally, let’s use the bootstrap to perform the same test using
 ``` r
 ## TODO: Use the bootstrap to compute a confidence interval for corr[high_GPA, univ_GPA]
 
-# estimate_pof <- function(df) {
-#   ## Fit the distribution
-#   df_fit <-
-#     df %>%
-#     pull(strength) %>%
-#     fitdistr(densfun = "lognormal") %>%
-#     tidy()
-# 
-#   ## Extract the parameters
-#   strength_meanlog <-
-#     df_fit %>%
-#     filter(term == "meanlog") %>%
-#     pull(estimate)
-#   strength_sdlog <-
-#     df_fit %>%
-#     filter(term == "sdlog") %>%
-#     pull(estimate)
-# 
-# ## TODO: Estimate the probability of failure using plnorm
-#   pof_estimate <- plnorm(L/A, meanlog = strength_meanlog, sdlog = strength_sdlog)
-# 
-#   ## NOTE: No need to edit; this last line returns your pof_estimate
-#   pof_estimate
-# }
-# 
 
-# tidycustom <- function(est) {tibble(term = "pof", estimate = est)}
-# 
-# df_samples %>%
-#   bootstraps(times = 1000) %>%
-#   mutate(
-#     estimates = map(
-#       splits,
-#       ~ analysis(.x) %>% estimate_pof() %>% tidycustom()
-#     )
-#   ) %>%
-#   int_pctl(estimates)
-
-
-
+confidence_interval <- function(col) {
+  col_mean <- mean(col)
+  tibble(
+    int_lo = col_mean + qnorm(0.005) * (sd(col) / sqrt(length(col))),
+    int_hi = col_mean + qnorm(0.995) * (sd(col) / sqrt(length(col))),
+  )
+}
 
 # estimate_corr <- function(df) {
 #   ## Fit the distribution
-#   df_fit <-
-#     df %>%
-#     pull(strength) %>%
-#     fitdistr(densfun = "lognormal") %>%
-#     tidy()
-#   
-# # Extract the parameters
-#   strength_meanlog <-
-#     df_fit %>%
-#     pull(estimate)
-#   strength_sdlog <-
-#     df_fit %>%
-#     filter(term == "sdlog") %>%
-#     pull(estimate)
-#   
-#   corr_estimate <- cor.test(df_composite$high_GPA, 
-#                            df_composite$univ_GPA, 
+# 
+#   corr_estimate <- cor.test(df$high_GPA,
+#                            df$univ_GPA,
 #                            alternative = "two.sided",
 #                            method = "pearson")
 # 
 #   ## NOTE: No need to edit; this last line returns your corr_estimate
-#   corr_estimate
+#   corr_estimate[4]
 # }
 # 
 # tidycustom <- function(est) {tibble(term = "corr", estimate = est)}
-# 
-# df_samples %>%
-#   bootstraps(times = 1000) %>%
-#   mutate(
-#     estimates = map(
-#       splits,
-#       ~ analysis(.x) %>% estimate_corr() %>% tidycustom()
-#     )
-#   ) %>%
-#   int_pctl(estimates)
-# 
-# 
-# 
-# confidence_interval <- function(col) {
-#   col_mean <- mean(col)
-#   tibble(
-#     int_lo = col_mean + qnorm(0.005) * (sd(col) / sqrt(length(col))),
-#     int_hi = col_mean + qnorm(0.995) * (sd(col) / sqrt(length(col))),
-#   )
-# }
+
+df_composite %>%
+  bootstraps(times = 1000) %>%
+  mutate(
+    estimates = map_dfr(splits,
+                    ~ analysis(.x) %>% summarize(
+                      corr_high_univ = cor.test(high_GPA, univ_GPA)$estimate,
+                    ))
+  ) %>%
+  mutate(
+    corr_high_univ = estimates %>% pull(corr_high_univ)
+  ) %>% 
+  summarize(
+    estimate = mean(corr_high_univ),
+    conf_inf = confidence_interval(corr_high_univ) %>%
+      rename(c(gpa_lo="int_lo", gpa_hi="int_hi"))
+  ) %>% 
+  unnest(cols = conf_inf)
 ```
+
+    ## # A tibble: 1 × 3
+    ##   estimate gpa_lo gpa_hi
+    ##      <dbl>  <dbl>  <dbl>
+    ## 1    0.782  0.779  0.786
 
 **Observations**:
 
 - How does your estimate from q5 compare with your estimate from q4?
-  - (Your response here)
+  - They are fairly close, and exist within each other’s confidence
+    intervals
 - How does your CI from q5 compare with your CI from q4?
-  - (Your response here)
+  - It seems much more narrow than q4 (a range of less than 0.01
+    compared to a range of about 0.16)
 
 *Aside*: When you use two different approximations to compute the same
 quantity and get similar results, that’s an *encouraging sign*. Such an
@@ -606,7 +573,7 @@ tools rather than do it by hand.
 
 ``` r
 ## TODO: Fit a model of univ_GPA on the predictor both_SAT
-fit_basic <- NA
+fit_basic <- lm(univ_GPA ~ both_SAT, data = df_train)
 
 ## NOTE: The following computes confidence intervals on regression coefficients
 fit_basic %>%
@@ -616,21 +583,22 @@ fit_basic %>%
   )
 ```
 
-    ## Warning: 'tidy.logical' is deprecated.
-    ## See help("Deprecated")
-
-    ## # A tibble: 1 × 1
-    ##   x    
-    ##   <lgl>
-    ## 1 NA
+    ## # A tibble: 2 × 7
+    ##   term        estimate std.error statistic  p.value conf.low conf.high
+    ##   <chr>          <dbl>     <dbl>     <dbl>    <dbl>    <dbl>     <dbl>
+    ## 1 (Intercept)  0.0260   0.396       0.0655 9.48e- 1 -1.02      1.07   
+    ## 2 both_SAT     0.00257  0.000322    7.97   1.08e-11  0.00172   0.00342
 
 **Observations**:
 
 - What is the confidence interval on the coefficient of `both_SAT`? Is
   this coefficient significantly different from zero?
-  - (Your response here)
+  - conf.low = 0.00172, conf.high = 0.00342
+  - This coefficient is significantly different from zero as zero is not
+    within the confidence interval
 - By itself, how well does `both_SAT` predict `univ_GPA`?
-  - (Your response here)
+  - It doesn’t seem to be a great indicator since the estimate/CF values
+    are much closer to 0 than 1.
 
 Remember from `e-model03-interp-warnings` that there are challenges with
 interpreting regression coefficients! Let’s investigate that idea
@@ -640,18 +608,53 @@ further.
 
 ``` r
 ## TODO: Fit and assess models with predictors both_SAT + high_GPA, and high_GPA alone
+
+fit_both <- lm(univ_GPA ~ both_SAT + high_GPA, data = df_train)
+fit_high <- lm(univ_GPA ~ high_GPA, data = df_train)
+
+## NOTE: The following computes confidence intervals on regression coefficients
+fit_both %>%
+  tidy(
+    conf.int = TRUE,
+    conf.level = 0.99
+  )
 ```
+
+    ## # A tibble: 3 × 7
+    ##   term        estimate std.error statistic     p.value  conf.low conf.high
+    ##   <chr>          <dbl>     <dbl>     <dbl>       <dbl>     <dbl>     <dbl>
+    ## 1 (Intercept) 0.758     0.362         2.09 0.0397      -0.199      1.71   
+    ## 2 both_SAT    0.000534  0.000457      1.17 0.247       -0.000674   0.00174
+    ## 3 high_GPA    0.570     0.103         5.55 0.000000396  0.299      0.842
+
+``` r
+fit_high %>%
+  tidy(
+    conf.int = TRUE,
+    conf.level = 0.99
+  )
+```
+
+    ## # A tibble: 2 × 7
+    ##   term        estimate std.error statistic  p.value conf.low conf.high
+    ##   <chr>          <dbl>     <dbl>     <dbl>    <dbl>    <dbl>     <dbl>
+    ## 1 (Intercept)    1.12     0.193       5.78 1.45e- 7    0.606     1.63 
+    ## 2 high_GPA       0.667    0.0617     10.8  3.79e-17    0.504     0.830
 
 **Observations**:
 
 - How well do these models perform, compared to the one you built in q6?
-  - (Your response here)
+  - The `both_SAT` model seems to preform better than the model in q6
+    since the confidence interval has become more narrow
 - What is the confidence interval on the coefficient of `both_SAT` when
   including `high_GPA` as a predictor?? Is this coefficient
   significantly different from zero?
-  - (Your response here)
+  - When including `high_GPA` as a predictor, the confidence interval
+    drastically increases (from a range of about 0.34 to 0.54). It is
+    still significantly different than zero since zero is not within
+    either confidence interval.
 - How do the hypothesis test results compare with the results in q6?
-  - (Your response here)
+  - The hypothesis test results match with those from q6
 
 ## Synthesize
 
@@ -665,11 +668,21 @@ Before closing, let’s synthesize a bit from the analyses above.
 
 - Between `both_SAT` and `high_GPA`, which single variable would you
   choose to predict `univ_GPA`? Why?
-  - (Your response here)
+  - `high_GPA` because the estimated correlation coefficient with
+    `univ_GPA` (and confidence interval) is closer to 1 than the
+    correlation coefficient between `both_SAT` and `univ_GPA`, meaning
+    they are more strongly correlated and a better indicator.
 - Is `both_SAT` an effective predictor of `univ_GPA`? What specific
   pieces of evidence do you have in favor of `both_SAT` being effective?
   What specific pieces of evidence do you have against?
-  - (Your response here)
+  - I would say it’s not an effective predictor
+  - In favor: it has a very small confidence interval, so we have a
+    better idea of what the “true” correlation might be. Also the
+    `both_SAT` score values are higher than `high_GPA`, so the smaller
+    correlation coefficient may be less of an indicator.
+  - Against: The correlation seems much more susceptible to large
+    variation since the possible `both_SAT` values have a lot more
+    variation (400-1600) than `high_GPA` (0-4)
 
 # End Notes
 
