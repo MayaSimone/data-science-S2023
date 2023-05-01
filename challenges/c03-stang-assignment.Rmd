@@ -121,13 +121,16 @@ df_stang_long %>%
   # group_by(angle) %>% 
   group_by(thick) %>% 
   summarise(count = n())
+
+df_stang_long %>% 
+  head(26)
 ```
 
 **Observations**:
 
 - Is there "one true value" for the material properties of Aluminum?
   - No, in the data there seems to be some variation in the measurements of `E` and `nu` across the different samples. `E` varies from 10700 to 9900 and `nu` varies from 0.03100 to 0.3310
-  - Furthermore, even though elasticity and Poisson's Ratio are considered material properties (constant for a particular alloy), this isn't necessarily true to real life. The 'known' values are more a value that is representative of the dsitribution of possible values (based on the many aspects that can cause variation in these values from how the atoms are arranged to noise in a signal when collecting data digitally).
+  - Furthermore, even though elasticity and Poisson's Ratio are considered material properties (constant for a particular alloy), this isn't necessarily true to real life. The 'known' values are more a value that is representative of the distribution of possible values (based on the many aspects that can cause variation in these values from how the atoms are arranged to noise in a signal when collecting data digitally).
 - How many aluminum alloys are in this dataset? How do you know?
   - One, the only alloy listed is `al_24st`
 - What angles were tested?
@@ -154,8 +157,11 @@ df_stang_long %>%
   
     guides(size = FALSE) +
   
-    labs(x = "Thickness (in)", y = TeX("Poisson's Ratio"), 
-         title = "Poisson's Ratio vs Thickness")
+    labs(x = "Thickness (in)", 
+         y = TeX("Poisson's Ratio"), 
+         title = "Poisson's Ratio vs Thickness", 
+         color = "Number of Occurences"
+         )
 ```
 
 **Observations**:

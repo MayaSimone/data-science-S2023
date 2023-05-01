@@ -83,14 +83,32 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.4.0      ✔ purrr   1.0.1 
-    ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.1      ✔ stringr 1.5.0 
-    ## ✔ readr   2.1.3      ✔ forcats 0.5.2 
+    ## Warning: package 'tidyverse' was built under R version 4.2.3
+
+    ## Warning: package 'ggplot2' was built under R version 4.2.3
+
+    ## Warning: package 'tibble' was built under R version 4.2.3
+
+    ## Warning: package 'tidyr' was built under R version 4.2.3
+
+    ## Warning: package 'readr' was built under R version 4.2.3
+
+    ## Warning: package 'dplyr' was built under R version 4.2.3
+
+    ## Warning: package 'forcats' was built under R version 4.2.3
+
+    ## Warning: package 'lubridate' was built under R version 4.2.3
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.1     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.1     
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
 
 ``` r
 library(latex2exp)
@@ -189,7 +207,7 @@ df_stang_long
     ##  8 0.032 al_24st    45 10400 0.318
     ##  9 0.032 al_24st    90 10300 0.322
     ## 10 0.032 al_24st     0 10300 0.319
-    ## # … with 16 more rows
+    ## # ℹ 16 more rows
 
 Use the following tests to check your work.
 
@@ -274,6 +292,26 @@ df_stang_long %>%
     ## 3 0.064     6
     ## 4 0.081     8
 
+``` r
+df_stang_long %>% 
+  head(26)
+```
+
+    ## # A tibble: 26 × 5
+    ##    thick alloy   angle     E    nu
+    ##    <dbl> <chr>   <int> <dbl> <dbl>
+    ##  1 0.022 al_24st     0 10600 0.321
+    ##  2 0.022 al_24st    45 10700 0.329
+    ##  3 0.022 al_24st    90 10500 0.31 
+    ##  4 0.022 al_24st     0 10600 0.323
+    ##  5 0.022 al_24st    45 10500 0.331
+    ##  6 0.022 al_24st    90 10700 0.323
+    ##  7 0.032 al_24st     0 10400 0.329
+    ##  8 0.032 al_24st    45 10400 0.318
+    ##  9 0.032 al_24st    90 10300 0.322
+    ## 10 0.032 al_24st     0 10300 0.319
+    ## # ℹ 16 more rows
+
 **Observations**:
 
 - Is there “one true value” for the material properties of Aluminum?
@@ -283,7 +321,7 @@ df_stang_long %>%
   - Furthermore, even though elasticity and Poisson’s Ratio are
     considered material properties (constant for a particular alloy),
     this isn’t necessarily true to real life. The ‘known’ values are
-    more a value that is representative of the dsitribution of possible
+    more a value that is representative of the distribution of possible
     values (based on the many aspects that can cause variation in these
     values from how the atoms are arranged to noise in a signal when
     collecting data digitally).
@@ -314,12 +352,18 @@ df_stang_long %>%
   
     guides(size = FALSE) +
   
-    labs(x = "Thickness (in)", y = TeX("Poisson's Ratio"), 
-         title = "Poisson's Ratio vs Thickness")
+    labs(x = "Thickness (in)", 
+         y = TeX("Poisson's Ratio"), 
+         title = "Poisson's Ratio vs Thickness", 
+         color = "Number of Occurences"
+         )
 ```
 
     ## Warning: The `<scale>` argument of `guides()` cannot be `FALSE`. Use "none" instead as
     ## of ggplot2 3.3.4.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
 ![](c03-stang-assignment_files/figure-gfm/q3-task-1.png)<!-- -->
 
@@ -420,69 +464,69 @@ df_stang_long %>%
 
     ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : pseudoinverse used at 0.081295
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : pseudoinverse used at 0.081295
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : neighborhood radius 0.049295
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : neighborhood radius 0.049295
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : reciprocal condition number 2.9951e-17
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : reciprocal condition number 2.9951e-17
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : There are other near singularities as well. 0.001024
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : There are other near singularities as well. 0.001024
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : pseudoinverse used at
     ## 0.081295
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : neighborhood radius
     ## 0.049295
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : reciprocal condition
     ## number 2.9951e-17
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : There are other near
     ## singularities as well. 0.001024
 
     ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : pseudoinverse used at 0.02179
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : pseudoinverse used at 0.02179
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : neighborhood radius 0.04221
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : neighborhood radius 0.04221
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : reciprocal condition number 2.4004e-17
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : reciprocal condition number 2.4004e-17
 
-    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric =
-    ## parametric, : There are other near singularities as well. 0.0017817
+    ## Warning in simpleLoess(y, x, w, span, degree = degree, parametric = parametric,
+    ## : There are other near singularities as well. 0.0017817
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : pseudoinverse used at
     ## 0.02179
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : neighborhood radius
     ## 0.04221
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : reciprocal condition
     ## number 2.4004e-17
 
-    ## Warning in predLoess(object$y, object$x, newx = if
-    ## (is.null(newdata)) object$x else if (is.data.frame(newdata))
+    ## Warning in predLoess(object$y, object$x, newx = if (is.null(newdata)) object$x
+    ## else if (is.data.frame(newdata))
     ## as.matrix(model.frame(delete.response(terms(object)), : There are other near
     ## singularities as well. 0.0017817
 
