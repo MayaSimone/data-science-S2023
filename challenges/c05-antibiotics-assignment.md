@@ -57,18 +57,38 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.4.0      ✔ purrr   1.0.1 
-    ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.1      ✔ stringr 1.5.0 
-    ## ✔ readr   2.1.3      ✔ forcats 0.5.2 
+    ## Warning: package 'tidyverse' was built under R version 4.2.3
+
+    ## Warning: package 'ggplot2' was built under R version 4.2.3
+
+    ## Warning: package 'tibble' was built under R version 4.2.3
+
+    ## Warning: package 'tidyr' was built under R version 4.2.3
+
+    ## Warning: package 'readr' was built under R version 4.2.3
+
+    ## Warning: package 'dplyr' was built under R version 4.2.3
+
+    ## Warning: package 'forcats' was built under R version 4.2.3
+
+    ## Warning: package 'lubridate' was built under R version 4.2.3
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.1     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.1     
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
 
 ``` r
 library(ggrepel)
 ```
+
+    ## Warning: package 'ggrepel' was built under R version 4.2.3
 
 *Background*: The data\[1\] we study in this challenge report the
 [*minimum inhibitory
@@ -212,13 +232,18 @@ your other visuals.
 
 ``` r
 df_antibiotics_long %>% 
+  mutate(bacteria = fct_reorder(bacteria, gram)) %>% 
   ggplot(aes(drug, bacteria)) +
   scale_fill_gradient(trans="log10", low = "purple", high = "green") +
   geom_tile(mapping = aes(fill = MIC)) +
-  geom_text(aes(label = gram))
+  facet_grid(~gram, scales = "free_y")
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.2-1.png)<!-- -->
+
+``` r
+  # geom_text(aes(label = gram))
+```
 
 #### Visual 3 (Some variables)
 
@@ -271,11 +296,14 @@ your other visuals.
 
 ``` r
 df_antibiotics_long %>%
-  ggplot(aes(bacteria, gram)) +
-  geom_point(mapping = aes(color = MIC), size = 2) +
-  scale_color_gradient(trans="log10", low = "blue", high = "red") +
-  coord_flip() +
-  facet_wrap(vars(drug))
+  filter(drug == "neomycin") %>%
+  mutate(bacteria = fct_reorder(bacteria, MIC)) %>%
+  mutate(bacteria = fct_reorder(bacteria, gram)) %>% 
+  ggplot(aes(bacteria, MIC)) +
+  geom_bar(aes(fill = gram), stat = "identity", width = .75) +
+  geom_hline(yintercept = 1) +
+  scale_y_log10() +
+  coord_flip()
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.5-1.png)<!-- -->
@@ -303,13 +331,13 @@ opportunity to think about why this is.**
 Pennicilin seems to be most effective against bacteria that present a
 negative gram strain, and least effective to those with a positive gram
 stain - Neomycin and streptomycin seem to have similar effects, though
-streptomycin is more effective against staphylooccocus - Which of your
+streptomycin is more effective against staphyloccocus - Which of your
 visuals above (1 through 5) is **most effective** at helping to answer
-this question? - I found visual 5 to be the most helpful for this
+this question? - I found visual 2 to be the most helpful for this
 question. - Why? - Though the color scale isn’t great if I want to read
-specific MIC values, the difference between red and blue is relatively
-easy for me to detect. Also having the gram stain results physically
-separated from each other made it easier to notice patterns
+specific MIC values, the difference between green and purple is
+relatively easy for me to detect. Also having the gram stain results
+physically separated from each other made it easier to notice patterns
 
 #### Guiding Question 2
 
@@ -320,10 +348,15 @@ and in 1984 *Streptococcus fecalis* was renamed *Enterococcus fecalis*
 > Why was *Diplococcus pneumoniae* was renamed *Streptococcus
 > pneumoniae*?
 
-*Observations* - What is your response to the question above? - The way
-the bacteria reacted to the 3 mentioned drugs is similar to other
-strains of Streptococcus - Which of your visuals above (1 through 5) is
-**most effective** at helping to answer this question? - Graph 3 -
+*Observations* - What is your response to the question above? -
+*Diplococcus pneumoniae* showed similar MIC values in the presence of
+the 3 mentioned drugs when compared to the other strains of
+Streptococcus in this dataset as well as also being gram positive. These
+similarities could indicate that the *Diplococcus pneumoniae* has a
+similar biological structure to other Streptococcus, which could explain
+why it was renamed to *Streptococcus pneumoniae* (to be grouped with
+other Streptococcus strains). - Which of your visuals above (1 through
+5) is **most effective** at helping to answer this question? - Graph 3 -
 Why? - I could see Diplococcus pneumoniae had points that were in line
 with the other Streptococcus for all three drugs because all the points
 were on the same axis
