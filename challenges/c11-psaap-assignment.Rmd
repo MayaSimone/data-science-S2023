@@ -76,12 +76,16 @@ df_psaap %>%
   summary()
 
 df_psaap %>% 
-  glimpse()
+  head(150)
 ```
 
 **Observations**:
 
-- (Take notes here!)
+- There are 22 different variables and 140 rows of data
+- There are 4 potential `x` values (0.25, 0.50, 0.75, and 1.00)
+- `I_0`, `avg_q`, `N_q` are very large values (in the realm of 10^6 or 10^7)
+- `mu_f` and `d_p` are very small values (in the realm of 10^-5 or 10^-6)
+- The `idk` variable is a list of integers, 1-35, for each value of `x`
 
 The important variables in this dataset are:
 
