@@ -102,20 +102,48 @@ for more information.
 
 ``` r
 library(MASS)
+```
+
+    ## Warning: package 'MASS' was built under R version 4.2.3
+
+``` r
 library(rsample)
 library(broom)
+```
+
+    ## Warning: package 'broom' was built under R version 4.2.3
+
+``` r
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.4.0      ✔ purrr   1.0.1 
-    ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.1      ✔ stringr 1.5.0 
-    ## ✔ readr   2.1.3      ✔ forcats 0.5.2 
+    ## Warning: package 'tidyverse' was built under R version 4.2.3
+
+    ## Warning: package 'ggplot2' was built under R version 4.2.3
+
+    ## Warning: package 'tibble' was built under R version 4.2.3
+
+    ## Warning: package 'tidyr' was built under R version 4.2.3
+
+    ## Warning: package 'readr' was built under R version 4.2.3
+
+    ## Warning: package 'dplyr' was built under R version 4.2.3
+
+    ## Warning: package 'forcats' was built under R version 4.2.3
+
+    ## Warning: package 'lubridate' was built under R version 4.2.3
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.1     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.1     
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
     ## ✖ dplyr::select() masks MASS::select()
+    ## ℹ Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
 
 ``` r
 filename_samples <- "./data/al_samples.csv"
@@ -172,7 +200,7 @@ df_samples
     ##  8   39674.
     ##  9   40144.
     ## 10   39865.
-    ## # … with 15 more rows
+    ## # ℹ 15 more rows
 
 Data Dictionary:
 
@@ -202,8 +230,9 @@ df_samples %>%
     a normal distribution.
 - Assuming the scopus is the strength of an individual part made from
   this aluminum alloy, is the observed variability real or induced?
-  - The variability would be induced, since we are looking at multiple
-    data points form one individual part
+  - The variability would be real since the measurements because the
+    measurements were taken in accordance with the “highest standards of
+    experimental rigor”
 
 # Assessing Structural Safety
 
@@ -369,9 +398,7 @@ df_norm_pof
 - Assuming your scopus is the probability of failure `POF` defined
   above, does your estimate exhibit real variability, induced
   variability, or both?
-  - Both: Real variability since the data is generated to have variation
-    within it and induced since there is some variability in the.
-    mathematical process to get the POF
+  - Induced variability which comes from the small sample size
 - Does this confidence interval imply that `POF < 0.03`?
   - Yes because even the highest estimate of POF is less than 0.03
     (0.022)
@@ -383,8 +410,7 @@ df_norm_pof
     the same mean and standard deviation).
 - Does the confidence interval above account for uncertainty arising
   from the *Monte Carlo approximation*? Why or why not?
-  - No because the POF and confidence intervals vary with different
-    Monte Carlo approximations (i.e. when a seed is not set)
+  - Yes because we use standard error across all Monte Carlo samples
 - Does the confidence interval above account for uncertainty arising
   from *limited physical tests* (`df_samples`)? Why or why not?
   - I think it does to some degree since it is now using many more data
@@ -517,11 +543,11 @@ df_samples %>%
 
 - Does the confidence interval above account for uncertainty arising
   from *Monte Carlo approximation* of the POF? Why or why not?
-  - It tries to by taking 1000 samples from `estimate_pof()`
+  - No because estimating POF with `pl_norm()` removed the Monte Carlo
+    error
 - Does the confidence interval above account for uncertainty arising
   from *limited physical tests* (`df_samples`)? Why or why not?
-  - No because `estimate_pof()` is still based off of the limited
-    physical tests
+  - Yes because we conducted bootstrap analysis
 - Can you confidently conclude that `POF < 0.03`? Why or why not?
   - No because the upper confidence interval is \~0.04915, so the true
     POF is not guaranteed to be less than 0.03
