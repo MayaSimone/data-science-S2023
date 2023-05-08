@@ -94,13 +94,18 @@ col_types_ACS = c(
     "Margin of Error!!Total" = "numeric",
     "Margin of Error!!Total_Annotate" = "numeric")
 
-df_pop <- read_csv(filename, skip = 2, col_names = col_names_ACS, 
+df_pop <- read_csv(filename,
+                   skip = 2,
+                   col_names = col_names_ACS, 
                    col_types = col_types_ACS)
 
-df_pop[is.na(df_pop)] <- 0
 
-df_pop_narrow <- select(df_pop, -c("Estimate!!Total-Annotate", 
-                                  "Margin of Error!!Total_Annotate"))
+df_pop_narrow <-
+  df_pop %>%
+  select(-c("Estimate!!Total-Annotate","Margin of Error!!Total_Annotate")) %>% 
+  mutate(
+    "Margin of Error!!Total" = replace_na(0)
+    )
 
 head(df_pop_narrow, 50)
 ```
@@ -160,10 +165,15 @@ To join these datasets, we'll need to use [FIPS county codes](https://en.wikiped
 
 ### __q3__ Process the `id` column of `df_pop` to create a `fips` column.
 
+
 ```{r q3-task}
 ## TASK: Create a `fips` column by extracting the county code
 df_q3 <- df_pop_narrow %>% 
-  mutate(fips = substr(id, nchar(id)-5+1, nchar(id)))
+  mutate(
+    fips = str_sub(id, start = -5)
+  )
+
+df_q3
 ```
 
 Use the following test to check your answer.
@@ -183,7 +193,7 @@ print("Very good!")
 
 ```{r q4-task}
 ## TASK: Join df_covid and df_q3 by fips.
-df_q4 <- inner_join(df_q3, df_covid, by = "fips")
+df_q4 <- left_join(df_q3, df_covid, by = "fips")
 
 df_q4
 ```
@@ -291,7 +301,6 @@ Before turning you loose, let's complete a couple guided EDA tasks.
 
 mean_sd1 <-
   df_normalized %>% 
-  # filter(date == as.Date("2020-01-21") )
   filter(date == lubridate::ymd("2020-05-13") |
          date == lubridate::ymd("2021-05-13") |
          date == lubridate::ymd("2022-05-13")) %>% 
@@ -352,9 +361,13 @@ top_deaths
 ```
 
 **Observations**:
-- The values for `cases_per100k` and `deaths_per100k` for the top 10 counties in each category are significantly higher than the mean values (about 6X and about 7X greater, respectively)
-  - This variation is also demonstrated by the fairly high S.D. values (roughly the same at the mean)
-- The highest `cases_per100k` (Loving, Texas) is significantly greater than the mean value (over 19X greater)
+
+- The values for `cases_per100k` and `deaths_per100k` for the top 10 counties in each category are significantly higher than their respective mean values across all counties on 3 different dates, each 1 year apart
+  - Since `cases_per100k` and `deaths_per100k` are both cumulative values, the `top_deaths` and `top_cases` frames will all be entries from more recent entries, meaning they would be more comparable to the overall country mean on the latest date (May 13, 2022)
+  - The `top_cases` values are about 2.0 to 7.7 times greater than the mean across all counties on this date, and the `top_deaths` are 2.5 to 3.6 times greater.
+  - This variation is also demonstrated by the fairly high S.D. values which are about a quarter of the `cases_per100k` mean and half the `deaths_per100k` mean on this date.
+  
+- The highest `cases_per100k` (Loving, Texas) is significantly greater than the mean value across all counties on May 13, 2021 (over 19X greater)
   - This is likely because the county has a very small population, so one case is a higher proportion of the population. This country also reported 94 more cases of covid then    its population at the time (196 vs 102)
 
 

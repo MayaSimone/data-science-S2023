@@ -116,14 +116,32 @@ for more information.
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.4.0      ✔ purrr   1.0.1 
-    ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.1      ✔ stringr 1.5.0 
-    ## ✔ readr   2.1.3      ✔ forcats 0.5.2 
+    ## Warning: package 'tidyverse' was built under R version 4.2.3
+
+    ## Warning: package 'ggplot2' was built under R version 4.2.3
+
+    ## Warning: package 'tibble' was built under R version 4.2.3
+
+    ## Warning: package 'tidyr' was built under R version 4.2.3
+
+    ## Warning: package 'readr' was built under R version 4.2.3
+
+    ## Warning: package 'dplyr' was built under R version 4.2.3
+
+    ## Warning: package 'forcats' was built under R version 4.2.3
+
+    ## Warning: package 'lubridate' was built under R version 4.2.3
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.1     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.1     
     ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
 
 *Background*:
 [COVID-19](https://en.wikipedia.org/wiki/Coronavirus_disease_2019) is
@@ -210,7 +228,9 @@ col_types_ACS = c(
     "Margin of Error!!Total" = "numeric",
     "Margin of Error!!Total_Annotate" = "numeric")
 
-df_pop <- read_csv(filename, skip = 2, col_names = col_names_ACS, 
+df_pop <- read_csv(filename,
+                   skip = 2,
+                   col_names = col_names_ACS, 
                    col_types = col_types_ACS)
 ```
 
@@ -220,28 +240,31 @@ df_pop <- read_csv(filename, skip = 2, col_names = col_names_ACS,
     ##   problems(dat)
 
 ``` r
-df_pop[is.na(df_pop)] <- 0
-
-df_pop_narrow <- select(df_pop, -c("Estimate!!Total-Annotate", 
-                                  "Margin of Error!!Total_Annotate"))
+df_pop_narrow <-
+  df_pop %>%
+  select(-c("Estimate!!Total-Annotate","Margin of Error!!Total_Annotate")) %>% 
+  mutate(
+    "Margin of Error!!Total" = replace_na(0)
+    )
 
 head(df_pop_narrow, 50)
 ```
 
     ## # A tibble: 50 × 4
-    ##    id             `Geographic Area Name`   `Estimate!!Total` Margin of Error!!…¹
-    ##    <chr>          <chr>                                <dbl>               <dbl>
-    ##  1 0500000US01001 Autauga County, Alabama              55200                   0
-    ##  2 0500000US01003 Baldwin County, Alabama             208107                   0
-    ##  3 0500000US01005 Barbour County, Alabama              25782                   0
-    ##  4 0500000US01007 Bibb County, Alabama                 22527                   0
-    ##  5 0500000US01009 Blount County, Alabama               57645                   0
-    ##  6 0500000US01011 Bullock County, Alabama              10352                   0
-    ##  7 0500000US01013 Butler County, Alabama               20025                   0
-    ##  8 0500000US01015 Calhoun County, Alabama             115098                   0
-    ##  9 0500000US01017 Chambers County, Alabama             33826                   0
-    ## 10 0500000US01019 Cherokee County, Alabama             25853                   0
-    ## # … with 40 more rows, and abbreviated variable name ¹​`Margin of Error!!Total`
+    ##    id            `Geographic Area Name` `Estimate!!Total` Margin of Error!!Tot…¹
+    ##    <chr>         <chr>                              <dbl>                  <dbl>
+    ##  1 0500000US010… Autauga County, Alaba…             55200                      0
+    ##  2 0500000US010… Baldwin County, Alaba…            208107                      0
+    ##  3 0500000US010… Barbour County, Alaba…             25782                      0
+    ##  4 0500000US010… Bibb County, Alabama               22527                      0
+    ##  5 0500000US010… Blount County, Alabama             57645                      0
+    ##  6 0500000US010… Bullock County, Alaba…             10352                      0
+    ##  7 0500000US010… Butler County, Alabama             20025                      0
+    ##  8 0500000US010… Calhoun County, Alaba…            115098                      0
+    ##  9 0500000US010… Chambers County, Alab…             33826                      0
+    ## 10 0500000US010… Cherokee County, Alab…             25853                      0
+    ## # ℹ 40 more rows
+    ## # ℹ abbreviated name: ¹​`Margin of Error!!Total`
 
 *Note*: You can find information on 1-year, 3-year, and 5-year estimates
 [here](https://www.census.gov/programs-surveys/acs/guidance/estimates.html).
@@ -335,9 +358,9 @@ df_pop %>% glimpse
     ## $ id                                <chr> "0500000US01001", "0500000US01003", …
     ## $ `Geographic Area Name`            <chr> "Autauga County, Alabama", "Baldwin …
     ## $ `Estimate!!Total`                 <dbl> 55200, 208107, 25782, 22527, 57645, …
-    ## $ `Estimate!!Total-Annotate`        <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
-    ## $ `Margin of Error!!Total`          <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
-    ## $ `Margin of Error!!Total_Annotate` <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+    ## $ `Estimate!!Total-Annotate`        <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+    ## $ `Margin of Error!!Total`          <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+    ## $ `Margin of Error!!Total_Annotate` <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, …
 
 ``` r
 df_covid %>% glimpse
@@ -362,8 +385,28 @@ the NYT data `df_covid` already contains the `fips`.
 ``` r
 ## TASK: Create a `fips` column by extracting the county code
 df_q3 <- df_pop_narrow %>% 
-  mutate(fips = substr(id, nchar(id)-5+1, nchar(id)))
+  mutate(
+    fips = str_sub(id, start = -5)
+  )
+
+df_q3
 ```
+
+    ## # A tibble: 3,220 × 5
+    ##    id      `Geographic Area Name` `Estimate!!Total` Margin of Error!!Tot…¹ fips 
+    ##    <chr>   <chr>                              <dbl>                  <dbl> <chr>
+    ##  1 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  2 050000… Baldwin County, Alaba…            208107                      0 01003
+    ##  3 050000… Barbour County, Alaba…             25782                      0 01005
+    ##  4 050000… Bibb County, Alabama               22527                      0 01007
+    ##  5 050000… Blount County, Alabama             57645                      0 01009
+    ##  6 050000… Bullock County, Alaba…             10352                      0 01011
+    ##  7 050000… Butler County, Alabama             20025                      0 01013
+    ##  8 050000… Calhoun County, Alaba…            115098                      0 01015
+    ##  9 050000… Chambers County, Alab…             33826                      0 01017
+    ## 10 050000… Cherokee County, Alab…             25853                      0 01019
+    ## # ℹ 3,210 more rows
+    ## # ℹ abbreviated name: ¹​`Margin of Error!!Total`
 
 Use the following test to check your answer.
 
@@ -389,26 +432,28 @@ print("Very good!")
 
 ``` r
 ## TASK: Join df_covid and df_q3 by fips.
-df_q4 <- inner_join(df_q3, df_covid, by = "fips")
+df_q4 <- left_join(df_q3, df_covid, by = "fips")
 
 df_q4
 ```
 
-    ## # A tibble: 2,474,010 × 10
-    ##    id         Geogr…¹ Estim…² Margi…³ fips  date       county state cases deaths
-    ##    <chr>      <chr>     <dbl>   <dbl> <chr> <date>     <chr>  <chr> <dbl>  <dbl>
-    ##  1 0500000US… Autaug…   55200       0 01001 2020-03-24 Autau… Alab…     1      0
-    ##  2 0500000US… Autaug…   55200       0 01001 2020-03-25 Autau… Alab…     4      0
-    ##  3 0500000US… Autaug…   55200       0 01001 2020-03-26 Autau… Alab…     6      0
-    ##  4 0500000US… Autaug…   55200       0 01001 2020-03-27 Autau… Alab…     6      0
-    ##  5 0500000US… Autaug…   55200       0 01001 2020-03-28 Autau… Alab…     6      0
-    ##  6 0500000US… Autaug…   55200       0 01001 2020-03-29 Autau… Alab…     6      0
-    ##  7 0500000US… Autaug…   55200       0 01001 2020-03-30 Autau… Alab…     7      0
-    ##  8 0500000US… Autaug…   55200       0 01001 2020-03-31 Autau… Alab…     7      0
-    ##  9 0500000US… Autaug…   55200       0 01001 2020-04-01 Autau… Alab…    10      0
-    ## 10 0500000US… Autaug…   55200       0 01001 2020-04-02 Autau… Alab…    10      0
-    ## # … with 2,474,000 more rows, and abbreviated variable names
-    ## #   ¹​`Geographic Area Name`, ²​`Estimate!!Total`, ³​`Margin of Error!!Total`
+    ## # A tibble: 2,474,019 × 10
+    ##    id      `Geographic Area Name` `Estimate!!Total` Margin of Error!!Tot…¹ fips 
+    ##    <chr>   <chr>                              <dbl>                  <dbl> <chr>
+    ##  1 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  2 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  3 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  4 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  5 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  6 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  7 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  8 050000… Autauga County, Alaba…             55200                      0 01001
+    ##  9 050000… Autauga County, Alaba…             55200                      0 01001
+    ## 10 050000… Autauga County, Alaba…             55200                      0 01001
+    ## # ℹ 2,474,009 more rows
+    ## # ℹ abbreviated name: ¹​`Margin of Error!!Total`
+    ## # ℹ 5 more variables: date <date>, county <chr>, state <chr>, cases <dbl>,
+    ## #   deaths <dbl>
 
 For convenience, I down-select some columns and produce more convenient
 column names.
@@ -432,21 +477,21 @@ df_data %>%
 ```
 
     ##       date               county             state               fips          
-    ##  Min.   :2020-01-21   Length:2474010     Length:2474010     Length:2474010    
+    ##  Min.   :2020-01-21   Length:2474019     Length:2474019     Length:2474019    
     ##  1st Qu.:2020-10-13   Class :character   Class :character   Class :character  
     ##  Median :2021-04-23   Mode  :character   Mode  :character   Mode  :character  
     ##  Mean   :2021-04-22                                                           
     ##  3rd Qu.:2021-11-02                                                           
     ##  Max.   :2022-05-13                                                           
-    ##                                                                               
+    ##  NA's   :9                                                                    
     ##      cases             deaths          population      
     ##  Min.   :      1   Min.   :    0.0   Min.   :      75  
     ##  1st Qu.:    390   1st Qu.:    6.0   1st Qu.:   11620  
     ##  Median :   1790   Median :   33.0   Median :   26719  
-    ##  Mean   :   9804   Mean   :  152.5   Mean   :  101992  
+    ##  Mean   :   9804   Mean   :  152.5   Mean   :  101995  
     ##  3rd Qu.:   5905   3rd Qu.:  101.0   3rd Qu.:   68460  
     ##  Max.   :2908425   Max.   :32022.0   Max.   :10098052  
-    ##                    NA's   :57605
+    ##  NA's   :9         NA's   :57614
 
 # Analyze
 
@@ -485,22 +530,22 @@ enteries_per_date <-
 enteries_per_date
 ```
 
-    ## # A tibble: 2,474,010 × 11
-    ## # Groups:   date [844]
-    ##    date       county  state   fips  cases deaths populat…¹ cases…² death…³     n
-    ##    <date>     <chr>   <chr>   <chr> <dbl>  <dbl>     <dbl>   <dbl>   <dbl> <int>
-    ##  1 2020-03-24 Autauga Alabama 01001     1      0     55200    1.81       0  1329
-    ##  2 2020-03-25 Autauga Alabama 01001     4      0     55200    7.25       0  1506
-    ##  3 2020-03-26 Autauga Alabama 01001     6      0     55200   10.9        0  1633
-    ##  4 2020-03-27 Autauga Alabama 01001     6      0     55200   10.9        0  1753
-    ##  5 2020-03-28 Autauga Alabama 01001     6      0     55200   10.9        0  1857
-    ##  6 2020-03-29 Autauga Alabama 01001     6      0     55200   10.9        0  1944
-    ##  7 2020-03-30 Autauga Alabama 01001     7      0     55200   12.7        0  2044
-    ##  8 2020-03-31 Autauga Alabama 01001     7      0     55200   12.7        0  2124
-    ##  9 2020-04-01 Autauga Alabama 01001    10      0     55200   18.1        0  2186
-    ## 10 2020-04-02 Autauga Alabama 01001    10      0     55200   18.1        0  2262
-    ## # … with 2,474,000 more rows, 1 more variable: Total <int>, and abbreviated
-    ## #   variable names ¹​population, ²​cases_per100k, ³​deaths_per100k
+    ## # A tibble: 2,474,019 × 11
+    ## # Groups:   date [845]
+    ##    date       county  state   fips  cases deaths population cases_per100k
+    ##    <date>     <chr>   <chr>   <chr> <dbl>  <dbl>      <dbl>         <dbl>
+    ##  1 2020-03-24 Autauga Alabama 01001     1      0      55200          1.81
+    ##  2 2020-03-25 Autauga Alabama 01001     4      0      55200          7.25
+    ##  3 2020-03-26 Autauga Alabama 01001     6      0      55200         10.9 
+    ##  4 2020-03-27 Autauga Alabama 01001     6      0      55200         10.9 
+    ##  5 2020-03-28 Autauga Alabama 01001     6      0      55200         10.9 
+    ##  6 2020-03-29 Autauga Alabama 01001     6      0      55200         10.9 
+    ##  7 2020-03-30 Autauga Alabama 01001     7      0      55200         12.7 
+    ##  8 2020-03-31 Autauga Alabama 01001     7      0      55200         12.7 
+    ##  9 2020-04-01 Autauga Alabama 01001    10      0      55200         18.1 
+    ## 10 2020-04-02 Autauga Alabama 01001    10      0      55200         18.1 
+    ## # ℹ 2,474,009 more rows
+    ## # ℹ 3 more variables: deaths_per100k <dbl>, n <int>, Total <int>
 
 You may use the following test to check your work.
 
@@ -568,7 +613,6 @@ Before turning you loose, let’s complete a couple guided EDA tasks.
 
 mean_sd1 <-
   df_normalized %>% 
-  # filter(date == as.Date("2020-01-21") )
   filter(date == lubridate::ymd("2020-05-13") |
          date == lubridate::ymd("2021-05-13") |
          date == lubridate::ymd("2022-05-13")) %>% 
@@ -583,12 +627,12 @@ mean_sd1
 ```
 
     ## # A tibble: 3 × 5
-    ##   date       mean_cases_per100k sd_cases_per100k mean_deaths_per100k sd_deaths…¹
-    ##   <date>                  <dbl>            <dbl>               <dbl>       <dbl>
-    ## 1 2020-05-13               234.             512.                9.86        22.1
-    ## 2 2021-05-13              9921.            3069.              198.         111. 
-    ## 3 2022-05-13             24774.            6233.              375.         160. 
-    ## # … with abbreviated variable name ¹​sd_deaths_per100k
+    ##   date       mean_cases_per100k sd_cases_per100k mean_deaths_per100k
+    ##   <date>                  <dbl>            <dbl>               <dbl>
+    ## 1 2020-05-13               234.             512.                9.86
+    ## 2 2021-05-13              9921.            3069.              198.  
+    ## 3 2022-05-13             24774.            6233.              375.  
+    ## # ℹ 1 more variable: sd_deaths_per100k <dbl>
 
 ``` r
 ## TASK: Compute mean and sd for cases_per100k and deaths_per100k
@@ -610,21 +654,21 @@ mean_sd_perCounty <-
 mean_sd_perCounty
 ```
 
-    ## # A tibble: 3,211 × 7
-    ##    state   county   fips  mean_cases_per100k sd_cases_per100k mean_dea…¹ sd_de…²
-    ##    <chr>   <chr>    <chr>              <dbl>            <dbl>      <dbl>   <dbl>
-    ##  1 Alabama Autauga  01001             12109.            9022.       170.    120.
-    ##  2 Alabama Baldwin  01003             10895.            8762.       143.    114.
-    ##  3 Alabama Barbour  01005              9387.            6635.       184.    129.
-    ##  4 Alabama Bibb     01007             12075.            9123.       236.    161.
-    ##  5 Alabama Blount   01009             11343.            8421.       191.    141.
-    ##  6 Alabama Bullock  01011             11034.            6382.       303.    160.
-    ##  7 Alabama Butler   01013             11314.            7546.       331.    175.
-    ##  8 Alabama Calhoun  01015             12040.            9092.       242.    186.
-    ##  9 Alabama Chambers 01017             10920.            7839.       281.    150.
-    ## 10 Alabama Cherokee 01019              7845.            6190.       152.    101.
-    ## # … with 3,201 more rows, and abbreviated variable names ¹​mean_deaths_per100k,
-    ## #   ²​sd_deaths_per100k
+    ## # A tibble: 3,220 × 7
+    ##    state   county  fips  mean_cases_per100k sd_cases_per100k mean_deaths_per100k
+    ##    <chr>   <chr>   <chr>              <dbl>            <dbl>               <dbl>
+    ##  1 Alabama Autauga 01001             12109.            9022.                170.
+    ##  2 Alabama Baldwin 01003             10895.            8762.                143.
+    ##  3 Alabama Barbour 01005              9387.            6635.                184.
+    ##  4 Alabama Bibb    01007             12075.            9123.                236.
+    ##  5 Alabama Blount  01009             11343.            8421.                191.
+    ##  6 Alabama Bullock 01011             11034.            6382.                303.
+    ##  7 Alabama Butler  01013             11314.            7546.                331.
+    ##  8 Alabama Calhoun 01015             12040.            9092.                242.
+    ##  9 Alabama Chambe… 01017             10920.            7839.                281.
+    ## 10 Alabama Cherok… 01019              7845.            6190.                152.
+    ## # ℹ 3,210 more rows
+    ## # ℹ 1 more variable: sd_deaths_per100k <dbl>
 
 ### **q7** Find the top 10 counties in terms of `cases_per100k`, and the top 10 in terms of `deaths_per100k`. Report the population of each county along with the per-100,000 counts. Compare the counts against the mean values you found in q6. Note any observations.
 
@@ -644,19 +688,18 @@ top_cases
 
     ## # A tibble: 10 × 6
     ## # Groups:   fips [10]
-    ##    fips  county                   state        population cases_per…¹ date      
-    ##    <chr> <chr>                    <chr>             <dbl>       <dbl> <date>    
-    ##  1 48301 Loving                   Texas               102     192157. 2022-05-12
-    ##  2 13053 Chattahoochee            Georgia           10767      69527. 2022-05-11
-    ##  3 02180 Nome Census Area         Alaska             9925      62922. 2022-05-11
-    ##  4 02188 Northwest Arctic Borough Alaska             7734      62542. 2022-05-11
-    ##  5 08025 Crowley                  Colorado           5630      59449. 2022-05-13
-    ##  6 02050 Bethel Census Area       Alaska            18040      57439. 2022-05-11
-    ##  7 46041 Dewey                    South Dakota       5779      54317. 2022-03-30
-    ##  8 48127 Dimmit                   Texas             10663      54019. 2022-05-12
-    ##  9 48247 Jim Hogg                 Texas              5282      50133. 2022-05-12
-    ## 10 02158 Kusilvak Census Area     Alaska             8198      49817. 2022-05-11
-    ## # … with abbreviated variable name ¹​cases_per100k
+    ##    fips  county                   state      population cases_per100k date      
+    ##    <chr> <chr>                    <chr>           <dbl>         <dbl> <date>    
+    ##  1 48301 Loving                   Texas             102       192157. 2022-05-12
+    ##  2 13053 Chattahoochee            Georgia         10767        69527. 2022-05-11
+    ##  3 02180 Nome Census Area         Alaska           9925        62922. 2022-05-11
+    ##  4 02188 Northwest Arctic Borough Alaska           7734        62542. 2022-05-11
+    ##  5 08025 Crowley                  Colorado         5630        59449. 2022-05-13
+    ##  6 02050 Bethel Census Area       Alaska          18040        57439. 2022-05-11
+    ##  7 46041 Dewey                    South Dak…       5779        54317. 2022-03-30
+    ##  8 48127 Dimmit                   Texas           10663        54019. 2022-05-12
+    ##  9 48247 Jim Hogg                 Texas            5282        50133. 2022-05-12
+    ## 10 02158 Kusilvak Census Area     Alaska           8198        49817. 2022-05-11
 
 ``` r
 ## TASK: Find the top 10 deaths_per100k counties; report populations as well
@@ -687,15 +730,29 @@ top_deaths
     ##  9 21201 Robertson         Kentucky           2143           980. 2022-02-03
     ## 10 51690 Martinsville city Virginia          13101           946. 2022-05-05
 
-**Observations**: - The values for `cases_per100k` and `deaths_per100k`
-for the top 10 counties in each category are significantly higher than
-the mean values (about 6X and about 7X greater, respectively) - This
-variation is also demonstrated by the fairly high S.D. values (roughly
-the same at the mean) - The highest `cases_per100k` (Loving, Texas) is
-significantly greater than the mean value (over 19X greater) - This is
-likely because the county has a very small population, so one case is a
-higher proportion of the population. This country also reported 94 more
-cases of covid then its population at the time (196 vs 102)
+**Observations**:
+
+- The values for `cases_per100k` and `deaths_per100k` for the top 10
+  counties in each category are significantly higher than their
+  respective mean values across all counties on 3 different dates, each
+  1 year apart
+  - Since `cases_per100k` and `deaths_per100k` are both cumulative
+    values, the `top_deaths` and `top_cases` frames will all be entries
+    from more recent entries, meaning they would be more comparable to
+    the overall country mean on the latest date (May 13, 2022)
+  - The `top_cases` values are about 2.0 to 7.7 times greater than the
+    mean across all counties on this date, and the `top_deaths` are 2.5
+    to 3.6 times greater.
+  - This variation is also demonstrated by the fairly high S.D. values
+    which are about a quarter of the `cases_per100k` mean and half the
+    `deaths_per100k` mean on this date.
+- The highest `cases_per100k` (Loving, Texas) is significantly greater
+  than the mean value across all counties on May 13, 2021 (over 19X
+  greater)
+  - This is likely because the county has a very small population, so
+    one case is a higher proportion of the population. This country also
+    reported 94 more cases of covid then its population at the time (196
+    vs 102)
 
 ## Self-directed EDA
 
@@ -760,6 +817,9 @@ df_normalized %>%
 
     ## Warning: `label_number_si()` was deprecated in scales 1.2.0.
     ## ℹ Please use the `scale_cut` argument of `label_number()` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
 ![](c06-covid19-assignment_files/figure-gfm/self-EDA-data-1.png)<!-- -->
 
